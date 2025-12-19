@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>My Planner — Profile</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Zen+Serif:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --accent:#6c65d6;
+
+  --text-main:#6f6b8f;    
+  --text-soft:#7a7396;   
+  --text-muted:#8b86a8;   
+
+  --glass: rgba(255,255,255,.15);
+  --border: rgba(255,255,255,.25);
+}
+
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  font-family:"Zen Serif", serif;
+  color:var(--text-soft);
+  background:url("img/background.png") no-repeat center center fixed;
+  background-size:cover;
+}
+
+.app{
+  max-width:420px;
+  margin:28px auto 130px;
+  padding:16px;
+}
+
+.card{
+  background:var(--glass);
+  backdrop-filter:blur(16px);
+  border-radius:22px;
+  padding:18px;
+  border:1px solid var(--border);
+  box-shadow:0 14px 30px rgba(0,0,0,.18);
+  margin-bottom:16px;
+}
+
+.profile{text-align:center}
+
+.avatar-wrap{
+  width:100px;
+  height:100px;
+  margin:0 auto 10px;
+  position:relative;
+}
+
+.avatar-ring{
+  position:absolute;
+  inset:-6px;
+  border-radius:50%;
+  background:conic-gradient(var(--accent),#ff9ac2,var(--accent));
+  opacity:.4;
+}
+
+.avatar{
+  width:100%;
+  height:100%;
+  border-radius:50%;
+  background:linear-gradient(135deg,var(--accent),#a78bfa);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:40px;
+  font-weight:600;
+  color:#fff;
+}
+
+h1, h2, h3, b{
+  color:var(--text-main);
+}
+
+.profile h1{
+  margin:6px 0 2px;
+  font-size:1.35rem;
+}
+
+.profile p{
+  margin:0;
+  font-size:.85rem;
+  color:var(--text-muted);
+}
+
+.tags{
+  margin-top:10px;
+  display:flex;
+  justify-content:center;
+  gap:6px;
+  flex-wrap:wrap;
+}
+
+.tag{
+  padding:5px 12px;
+  font-size:.75rem;
+  border-radius:999px;
+  background:var(--glass);
+  backdrop-filter:blur(12px);
+  border:1px solid var(--border);
+  color:var(--text-soft);
+}
+
+.btn{
+  margin-top:14px;
+  padding:9px 22px;
+  border:none;
+  border-radius:999px;
+  font-size:.9rem;
+  background:linear-gradient(135deg,var(--accent),#a78bfa);
+  color:#fff;
+  cursor:pointer;
+}
+
+.stats-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:10px;
+}
+
+.stat{
+  padding:12px;
+  border-radius:16px;
+  background:var(--glass);
+  backdrop-filter:blur(12px);
+  border:1px solid var(--border);
+  text-align:center;
+}
+
+.stat span{
+  color:var(--text-muted);
+}
+
+.progress-title{
+  font-weight:600;
+  margin-bottom:6px;
+  color:var(--text-main);
+}
+
+.progress-bar{
+  height:9px;
+  border-radius:999px;
+  background:rgba(0,0,0,.18);
+  overflow:hidden;
+}
+
+.progress-fill{
+  height:100%;
+  border-radius:999px;
+  background:linear-gradient(90deg,var(--accent),#ff9ac2);
+}
+
+#percent{
+  margin-top:6px;
+  color:var(--text-muted);
+}
+
+nav.footer{
+  position:fixed;
+  bottom:14px;
+  left:50%;
+  transform:translateX(-50%);
+  display:flex;
+  gap:10px;
+  background:var(--glass);
+  backdrop-filter:blur(18px);
+  padding:10px 16px;
+  border-radius:20px;
+  border:1px solid var(--border);
+  box-shadow:0 12px 28px rgba(0,0,0,.18);
+}
+
+nav.footer a{
+  text-decoration:none;
+  padding:8px 12px;
+  border-radius:14px;
+  font-size:.9rem;
+  color:var(--text-soft);
+}
+
+nav.footer a.active{
+  background:rgba(108,101,214,.25);
+  font-weight:500;
+  color:var(--text-main);
+}
+</style>
+</head>
+
+<body>
+
+<main class="app">
+
+<section class="card profile">
+  <div class="avatar-wrap">
+    <div class="avatar-ring"></div>
+    <div class="avatar" id="avatar">U</div>
+  </div>
+
+  <h1 id="name">Nama Kamu</h1>
+  <p id="tagline">Menata hari dengan planner yang lembut ✨</p>
+
+  <div class="tags">
+    <div class="tag">☀️ Morning plan</div>
+    <div class="tag">🎯 Fokus goal</div>
+    <div class="tag">📊 Weekly review</div>
+  </div>
+
+  <button class="btn" onclick="editProfile()">✏️ Edit Profil</button>
+</section>
+
+<section class="card">
+  <div class="stats-grid">
+    <div class="stat"><b>7</b><span>Hari streak</span></div>
+    <div class="stat"><b>24</b><span>Tugas selesai</span></div>
+    <div class="stat"><b>3</b><span>Sesi fokus</span></div>
+    <div class="stat"><b>2</b><span>Goal dekat</span></div>
+  </div>
+</section>
+
+<section class="card">
+  <div class="progress-title">Progress Mingguan</div>
+  <div class="progress-bar">
+    <div class="progress-fill" id="progress"></div>
+  </div>
+  <div id="percent">70%</div>
+</section>
+
+</main>
+
+<nav class="footer">
+  <a href="index.html">Home</a>
+  <a href="calendar.html">Calendar</a>
+  <a class="active" href="profile.html">Profile</a>
+  <a href="About.html">About us</a>
+</nav>
+
+<script>
+function loadProfile(){
+  const name = localStorage.getItem("profile_name") || "Nama Kamu";
+  const tagline = localStorage.getItem("profile_tagline") || "Menata hari dengan planner yang lembut ✨";
+
+  document.getElementById("name").textContent = name;
+  document.getElementById("tagline").textContent = tagline;
+  document.getElementById("avatar").textContent = name.charAt(0).toUpperCase();
+
+  const percent = 65 + Math.floor(Math.random()*25);
+  document.getElementById("percent").textContent = percent + "%";
+  document.getElementById("progress").style.width = percent + "%";
+}
+
+function editProfile(){
+  const name = prompt("Nama:");
+  const tagline = prompt("Tagline:");
+  if(name) localStorage.setItem("profile_name", name);
+  if(tagline) localStorage.setItem("profile_tagline", tagline);
+  loadProfile();
+}
+loadProfile();
+</script>
+
+</body>
+</html>

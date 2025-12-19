@@ -1,0 +1,541 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shopping List</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&display=swap" rel="stylesheet">
+
+<style>
+
+
+:root{
+  --accent:#ff8fab;
+  --accent-2:#ffa6d1;
+  --bg1:#e9d9ff;
+  --bg2:#ffd4e6;
+  --text:#333;
+  --glass:#ffffff40;
+  --border:#ffffff70;
+  --card:#ffffff60;
+}
+
+body{
+  margin:0;
+  font-family:"Zen Serif", serif;
+  padding-bottom:120px;
+  background:linear-gradient(135deg,var(--bg1),var(--bg2));
+  backdrop-filter:blur(20px);
+  color:var(--text);
+  overflow-x:hidden;
+}
+
+.bg-glow{
+  position:fixed;
+  inset:0;
+  background:
+     radial-gradient(circle at 20% 30%, #ffffff80 0%, transparent 60%),
+     radial-gradient(circle at 80% 70%, #ffffff50 0%, transparent 60%),
+     radial-gradient(circle at 60% 10%, #ffd6fa60 0%, transparent 60%);
+  filter:blur(90px);
+  z-index:-1;
+}
+
+
+header{
+  text-align:center;
+    background:hsl(202, 85%, 71%);
+    font-size:32px;
+    font-weight:700;
+     padding:26px 0;
+     color:white;
+     text-shadow:0 3px 12px rgba(0,0,0,0.15);
+  
+}
+
+.card{
+  background:var(--card);
+  backdrop-filter:blur(25px);
+  border:1px solid var(--border);
+  padding:24px;
+  border-radius:28px;
+  box-shadow:0 10px 35px rgba(0,0,0,0.12);
+  margin:20px auto;
+  width:90%;
+  max-width:820px;
+  animation:fade .5s ease;
+}
+
+@keyframes fade{
+  from{opacity:0; transform:translateY(12px);}
+  to{opacity:1; transform:translateY(0);}
+}
+
+.input-main, .search-input, .filter-select, .budget-input{
+  width:100%;
+  padding:14px 18px;
+  border-radius:16px;
+  border:1px solid #ffffff80;
+  background:#ffffffcc;
+  font-size:15px;
+  outline:none;
+}
+
+.top-controls{
+  display:flex;
+  flex-wrap:wrap;
+  gap:12px;
+  margin-top:12px;
+}
+
+.filter-select{
+  flex:1;
+  appearance:none;
+  background:#ffffffcc url('data:image/svg+xml;utf8,<svg fill="gray" height="14" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>') no-repeat right 12px center;
+}
+
+.btn-primary{
+  background:linear-gradient(135deg,var(--accent),var(--accent-2));
+  color:white;
+  padding:14px 18px;
+  border:none;
+  border-radius:16px;
+  font-weight:600;
+  cursor:pointer;
+  box-shadow:0 8px 25px rgba(255,100,150,0.3);
+  transition:.2s;
+}
+
+.btn-primary:hover{
+  transform:scale(1.05);
+}
+
+.budget-box{
+  margin-top:18px;
+}
+
+.budget-status{
+  margin-top:4px;
+  font-size:14px;
+  opacity:0.8;
+}
+
+.budget-bar{
+  background:#ffffff70;
+  height:10px;
+  border-radius:20px;
+  margin-top:8px;
+  overflow:hidden;
+}
+
+.budget-bar-fill{
+  height:100%;
+  width:0%;
+  background:linear-gradient(90deg,#8bc6ff,#ff9af0);
+  transition:.4s;
+}
+
+
+.category-title{
+  font-size:20px;
+  font-weight:700;
+  margin-bottom:12px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+
+.list{
+  list-style:none;
+  padding:0;
+  margin:0;
+}
+
+.list li{
+  display:flex;
+  align-items:center;
+  background:#ffffffcc;
+  padding:16px;
+  border-radius:20px;
+  border:1px solid #ffffff80;
+  margin-bottom:12px;
+  box-shadow:0 6px 18px rgba(0,0,0,0.08);
+  animation:itemFade .4s ease;
+}
+
+@keyframes itemFade{
+  from{opacity:0; transform:translateY(10px);}
+  to{opacity:1; transform:translateY(0);}
+}
+
+.list li.checked{
+  opacity:0.6;
+  text-decoration:line-through;
+}
+
+.badge{
+  font-size:12px;
+  background:#e6e8ff;
+  padding:4px 8px;
+  border-radius:12px;
+  display:inline-block;
+  margin-bottom:4px;
+}
+
+
+.item-actions{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  margin-left:12px;
+}
+
+.action-btn{
+  padding:6px 12px;
+  border-radius:12px;
+  font-size:12px;
+  border:none;
+  cursor:pointer;
+}
+
+.action-edit{background:#dbeafe;color:#1d4ed8;}
+.action-del{background:#fee2e2;color:#b91c1c;}
+
+.fav-btn{
+  border:none;
+  background:none;
+  font-size:22px;
+  cursor:pointer;
+}
+
+.fab{
+  position:fixed;
+  bottom:26px;
+  right:26px;
+  width:64px;
+  height:64px;
+  border-radius:50%;
+  background:linear-gradient(135deg,#ff8fab,#ffa6d1);
+  color:white;
+  font-size:34px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow:0 12px 30px rgba(0,0,0,0.25);
+  cursor:pointer;
+  transition:.2s;
+}
+
+.fab:hover{
+  transform:scale(1.08);
+}
+
+.bottom-actions{
+  display:flex;
+  gap:12px;
+  flex-wrap:wrap;
+  justify-content:center;
+  margin-top:18px;
+}
+
+.bottom-actions button{
+  padding:12px 20px;
+  border-radius:14px;
+  font-size:14px;
+  border:none;
+  cursor:pointer;
+  background:#ffffffcc;
+  box-shadow:0 5px 14px rgba(0,0,0,0.08);
+}
+
+.danger{background:#ffe1e1!important;color:#b40000;}
+</style>
+</head>
+
+<body>
+
+<div class="bg-glow"></div>
+
+<header>Shopping List</header>
+
+
+<section class="card">
+  <input id="itemInput" class="input-main" placeholder="Tambah item… (misal: Susu 20000)">
+  
+  <div class="top-controls">
+    <input id="searchInput" class="search-input" placeholder="Cari item...">
+    <select id="categoryFilter" class="filter-select">
+      <option value="all">Semua kategori</option>
+      <option value="Dapur">Dapur</option>
+      <option value="Rumah">Rumah</option>
+      <option value="Snack">Snack</option>
+      <option value="Minuman">Minuman</option>
+      <option value="Lainnya">Lainnya</option>
+    </select>
+    <select id="sortMode" class="filter-select">
+      <option value="name">Nama</option>
+      <option value="price">Harga</option>
+      <option value="favorite">Favorit</option>
+    </select>
+  </div>
+
+  <div class="budget-box">
+    <input id="budgetInput" class="budget-input" placeholder="Masukkan Budget">
+    <div class="budget-bar"><div id="budgetFill" class="budget-bar-fill"></div></div>
+    <div id="budgetStatus" class="budget-status">Belum ada budget.</div>
+  </div>
+</section>
+
+
+<section id="groupedContainer"></section>
+
+
+<div class="card">
+  <div class="bottom-actions">
+    <button id="saveBtn">💾 Simpan</button>
+    <button id="loadBtn">📂 Muat</button>
+    <button id="clearBtn" class="danger">🗑 Hapus Semua</button>
+    <button id="aiBtn">🤖 AI</button>
+    <button id="sortBtn">🔃 Urutkan</button>
+    <button id="exportBtn">📤 PDF</button>
+  </div>
+</div>
+
+<script>
+const KEY="shopping";
+let items=[];
+let undoStack=null;
+const groupedContainer=document.getElementById("groupedContainer");
+
+function extractPrice(t){
+  const n=t.replace(/[^0-9]/g,"");
+  return n?parseInt(n):0;
+}
+
+function autoCategory(n){
+  n=n.toLowerCase();
+  if(n.includes("beras")||n.includes("gula")||n.includes("minyak"))return "Dapur";
+  if(n.includes("sabun")||n.includes("baygon")||n.includes("pel"))return "Rumah";
+  if(n.includes("ciki")||n.includes("snack")||n.includes("keripik"))return "Snack";
+  if(n.includes("teh")||n.includes("kopi")||n.includes("susu"))return "Minuman";
+  return "Lainnya";
+}
+
+const CAT_EMOJI={
+  Dapur:"🧂",
+  Rumah:"🏡",
+  Snack:"🍟",
+  Minuman:"🥤",
+  Lainnya:"📦"
+};
+
+function addItem(){
+  const val=document.getElementById("itemInput").value.trim();
+  if(!val) return;
+
+  items.push({
+    name:val,
+    price:extractPrice(val),
+    cat:autoCategory(val),
+    fav:false,
+    checked:false
+  });
+
+  document.getElementById("itemInput").value="";
+  render();
+  saveList();
+}
+
+function render(){
+  groupedContainer.innerHTML="";
+
+  const q=document.getElementById("searchInput").value.toLowerCase();
+  const catF=document.getElementById("categoryFilter").value;
+  const sort=document.getElementById("sortMode").value;
+
+  let arr=items.filter(i=>{
+    return (i.name.toLowerCase().includes(q)) &&
+           (catF==="all" || i.cat===catF);
+  });
+
+  if(sort==="name")arr.sort((a,b)=>a.name.localeCompare(b.name));
+  if(sort==="price")arr.sort((a,b)=>a.price-b.price);
+  if(sort==="favorite")arr.sort((a,b)=>b.fav-a.fav);
+
+  const groups={};
+  arr.forEach(it=>{
+    if(!groups[it.cat])groups[it.cat]=[];
+    groups[it.cat].push(it);
+  });
+
+  for(const cat in groups){
+    const card=document.createElement("section");
+    card.className="card";
+
+    const title=document.createElement("div");
+    title.className="category-title";
+    title.innerHTML=`${CAT_EMOJI[cat]} ${cat}`;
+    card.appendChild(title);
+
+    const ul=document.createElement("ul");
+    ul.className="list";
+
+    groups[cat].forEach(it=>{
+      const li=document.createElement("li");
+
+      if(it.checked) li.classList.add("checked");
+
+      const checkbox=document.createElement("input");
+      checkbox.type="checkbox";
+      checkbox.checked=it.checked;
+      checkbox.onclick=()=>{
+        it.checked=!it.checked;
+        render(); saveList();
+      };
+
+      const main=document.createElement("div");
+      main.style.flex="1";
+      main.style.marginLeft="10px";
+
+      const badge=document.createElement("span");
+      badge.className="badge";
+      badge.textContent=it.cat;
+
+      const nm=document.createElement("div");
+      nm.textContent=it.name;
+
+      const price=document.createElement("div");
+      price.style.fontSize="13px";
+      price.style.opacity="0.6";
+      price.textContent="Harga: "+(it.price?it.price.toLocaleString():"-");
+
+      main.appendChild(badge);
+      main.appendChild(nm);
+      main.appendChild(price);
+
+      const fav=document.createElement("button");
+      fav.className="fav-btn";
+      fav.textContent=it.fav?"★":"☆";
+      fav.onclick=()=>{
+        it.fav=!it.fav;
+        render(); saveList();
+      };
+
+      const act=document.createElement("div");
+      act.className="item-actions";
+
+      const edit=document.createElement("button");
+      edit.className="action-btn action-edit";
+      edit.textContent="Edit";
+      edit.onclick=()=>{
+        const v=prompt("Edit item:",it.name);
+        if(!v) return;
+        it.name=v;
+        it.price=extractPrice(v);
+        it.cat=autoCategory(v);
+        render(); saveList();
+      };
+
+      const del=document.createElement("button");
+      del.className="action-btn action-del";
+      del.textContent="Hapus";
+      del.onclick=()=>deleteItem(it);
+
+      act.appendChild(edit);
+      act.appendChild(del);
+
+      li.appendChild(checkbox);
+      li.appendChild(main);
+      li.appendChild(fav);
+      li.appendChild(act);
+
+      ul.appendChild(li);
+    });
+
+    card.appendChild(ul);
+    groupedContainer.appendChild(card);
+  }
+
+  updateBudget();
+}
+
+function deleteItem(item){
+  undoStack={...item};
+  items=items.filter(i=>i!==item);
+  render(); saveList();
+}
+
+function updateBudget(){
+  const budget=parseInt(document.getElementById("budgetInput").value||"0");
+  const total=items.reduce((a,b)=>a+b.price,0);
+  const bar=document.getElementById("budgetFill");
+  const txt=document.getElementById("budgetStatus");
+
+  if(!budget){
+    bar.style.width="0%";
+    txt.textContent="Belum ada budget.";
+    return;
+  }
+
+  const ratio=Math.min(total/budget,1);
+  bar.style.width=(ratio*100)+"%";
+
+  txt.textContent=ratio<0.6?"Aman":
+                  ratio<1?"Mendekati limit":"Budget terlampaui!";
+}
+
+function saveList(){ localStorage.setItem(KEY,JSON.stringify(items)); }
+function loadList(){
+  const raw=localStorage.getItem(KEY);
+  if(raw) items=JSON.parse(raw);
+  render();
+}
+
+document.getElementById("itemInput").onkeydown=e=>{if(e.key==="Enter")addItem();}
+document.getElementById("searchInput").oninput=render;
+document.getElementById("categoryFilter").onchange=render;
+document.getElementById("sortMode").onchange=render;
+document.getElementById("budgetInput").oninput=updateBudget;
+
+document.getElementById("saveBtn").onclick=saveList;
+document.getElementById("loadBtn").onclick=loadList;
+document.getElementById("clearBtn").onclick=()=>{ if(confirm("Hapus semua?")){items=[];saveList();render();}};
+document.getElementById("aiBtn").onclick=()=>{
+  ["Beras 65000","Telur 28000","Susu 20000","Teh Kotak 6000"].forEach(v=>{
+    items.push({name:v,price:extractPrice(v),cat:autoCategory(v),fav:false,checked:false});
+  });
+  render(); saveList();
+};
+document.getElementById("sortBtn").onclick=render;
+
+document.getElementById("exportBtn").onclick=()=>{
+  let content="Shopping List:\n\n";
+  const groups={};
+  items.forEach(i=>{
+    if(!groups[i.cat])groups[i.cat]=[];
+    groups[i.cat].push(i);
+  });
+
+  for(const cat in groups){
+    content+=CAT_EMOJI[cat]+" "+cat+"\n";
+    groups[cat].forEach(i=>{
+      content+="• "+i.name+" — "+i.price+"\n";
+    });
+    const total=groups[cat].reduce((a,b)=>a+b.price,0);
+    content+="Total "+cat+": "+total+"\n\n";
+  }
+
+  const blob=new Blob([content],{type:"text/plain"});
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  a.download="shopping_list.txt";
+  a.click();
+};
+
+loadList();
+</script>
+
+</body>
+</html>

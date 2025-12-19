@@ -1,0 +1,768 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Daily Routine — Notebook + Journal</title>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Serif:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+
+:root{--bg:#f7f4f2;
+  --paper:#fffaf4;
+  --muted:#6f6b75;
+  --accent:#2f2149;
+  --shadow:0 20px 50px rgba(30,20,60,0.06)
+}
+*{box-sizing:border-box;
+  margin:0;
+  padding:0
+}
+  body{
+  font-family:"Zen Serif", serif;
+  background:linear-gradient(180deg,#fff,#f6f5f3);
+  color:var(--muted);-webkit-font-smoothing:antialiased
+}
+.app{max-width:980px;margin:18px auto;
+  padding:18px}.header-row{display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:12px
+  }
+  .ctrl-btn
+  {background:#fff;
+    border:1px solid rgba(0,0,0,0.06);
+    padding:8px 12px;border-radius:12px;cursor:pointer
+  }
+.note-wrap{display:flex;
+  gap:18px;justify-content:center;
+  position:relative}
+.spiral
+{position:absolute;
+  left:-48px;top:26px;display:flex;
+  flex-direction:column;gap:14px;
+  pointer-events:none
+}
+.spiral .coil{width:22px;
+  height:22px;border-radius:50%;
+  border:6px solid rgba(80,60,90,0.15)
+}
+.spiral-thick .coil{width:32px;
+  height:32px;
+  border:8px solid rgba(50,40,80,0.22)
+}
+.spiral-right
+{left:auto;
+  right:-48px
+}
+  .binder-holes
+  {position:absolute;
+    left:-30px;top:30px;
+    display:flex;flex-direction:column
+    ;gap:40px
+  }
+    .binder-holes .hole{width:16px;
+      height:16px;background:#ddd;
+      border-radius:50%;box-shadow:inset 0 2px 4px rgba(0,0,0,0.2)
+    }
+.page
+{width:760px;min-height:820px;
+  background:var(--paper);
+  border-radius:14px;padding:18px 20px;
+  border:1px solid rgba(120,110,160,0.06);
+  box-shadow:var(--shadow);
+  position:relative;
+  overflow:hidden}
+.paper-cream{background:#fdf7ef}
+.paper-pink{background:#fdeff4}
+.paper-blue-scrap{background:#e8f2ff;border:3px dashed rgba(255,255,255,0.8);
+  box-shadow:inset 0 4px 0 rgba(255,255,255,0.7);
+  border-radius:10px}
+  .paper-kraft{background:#f2e3c6;
+    background-image:radial-gradient(#d2c4a8 1px, transparent 1px);
+    background-size:10px 10px}
+    .paper-green{background:#e7f7e7}
+    .paper-ruled{background:repeating-linear-gradient(to bottom, transparent 0px, transparent 22px, rgba(0,0,0,0.08) 23px)}
+    .paper-dotted{background:radial-gradient(#bcbcbc 1px, transparent 1px), #ffffff;background-size:14px 14px}
+    .paper-grid{background:linear-gradient(#dcdcdc 1px, transparent 1px), linear-gradient(90deg,#dcdcdc 1px, transparent 1px);background-size:28px 28px}
+    .paper-lavender{background:#f3edff}
+    .paper-cloud{background:#eef8ff;
+      background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="160" height="80"><text x="0" y="60" font-size="48">☁️</text></svg>');
+      background-size:160px 80px;
+      opacity:0.95
+    }
+.theme-grid{background-size:32px 32px;
+  background-image:linear-gradient(to right, rgba(0,0,0,0.06) 1px, transparent 1px),linear-gradient(to bottom, rgba(0,0,0,0.06) 1px, transparent 1px)}
+.theme-ruled{background-image:repeating-linear-gradient(to bottom, transparent 0px, transparent 28px, rgba(0,0,0,0.08) 29px)}
+.theme-dot{background-image:radial-gradient(#bbb 1px, transparent 1px);background-size:18px 18px}
+.theme-binder{background:#fffef7}
+.left-col{
+  float:left;
+  width:56%;
+  padding-right:14px
+}
+.right-col{
+  float:right;
+  width:44%;
+  padding-left:14px
+}
+.page-title{
+  text-align:center;
+  font-size:26px;
+  font-weight:800;
+  margin-bottom:12px
+}
+.section-title{
+  font-weight:700;
+  margin:12px 0 6px
+}
+.box{
+  position:relative;
+  padding:10px;
+  border-radius:10px
+}
+.theme-control{
+  position:absolute;
+  right:8px;
+  top:8px;
+  background:rgba(255,255,255,0.95);
+  border:1px solid rgba(0,0,0,0.06);
+  border-radius:999px;
+  width:32px;
+  height:32px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  z-index:40;
+  font-size:15px
+}
+.theme-select{
+  display:none;
+  position:absolute;
+  right:8px;top:44px;
+  background:white;
+  border:1px solid rgba(0,0,0,0.06);
+  box-shadow:0 8px 20px rgba(0,0,0,0.08);
+  border-radius:8px;
+  padding:8px;
+  z-index:50
+}
+.face{
+  width:34px;
+  height:34px;
+  border-radius:8px;
+  background:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  box-shadow:0 6px 10px rgba(0,0,0,0.03)
+}
+.face.active{
+  outline:3px solid rgba(130,110,220,0.2)}
+.todo-list{
+  list-style:none;
+  padding:0;
+  margin:0
+}
+.todo-list li{
+  display:flex;
+  align-items:center;
+  padding:6px 0;
+  border-bottom:1px dashed rgba(0,0,0,0.04)
+}
+.todo-item{
+  flex:1;
+  padding-left:6px;
+  border-bottom:1px solid rgba(0,0,0,0.06)
+}
+.prod-row{
+  display:flex;
+  gap:8px;
+  margin-top:10px
+}
+.star{
+  width:26px;
+  height:26px;
+  border-radius:6px;
+  border:1px solid rgba(0,0,0,0.05);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer
+}
+.star.active{
+  background:#ffeadd;
+  border-color:#ffb58d
+}
+.rbox{
+  padding:12px;
+  border-radius:10px
+}
+.gratitude{
+  min-height:120px;
+  padding:12px;
+  border-radius:8px;
+  border:3px dashed rgba(255,255,255,0.7)
+}
+.clouds{
+  display:flex;
+  gap:8px
+}
+.cloud{
+  padding:8px 12px;
+  border-radius:999px;
+  border:1px dashed rgba(0,0,0,0.06);
+  background:#fff;
+  cursor:pointer
+}
+.cloud.active{
+  background:#fffcf7;
+  border:1px solid rgba(0,0,0,0.08)
+}
+.affirm{
+  min-height:110px;
+  padding:12px;
+  border-radius:8px
+}
+.page-bottom{
+  clear:both;
+  margin-top:16px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center
+}
+.small-ctrl{
+  padding:6px 8px;
+  background:#fff;
+  border:1px solid rgba(0,0,0,0.05);
+  border-radius:8px;
+  cursor:pointer
+}
+.todo-wrapper{
+  padding:8px;
+  border-radius:10px
+}
+.paper-pad{
+  padding:12px
+}
+
+#journalModal{
+  position:fixed;
+  left:0;
+  top:0;
+  width:100%;
+  height:100%;
+  background:rgba(0,0,0,0.42);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:9999
+}
+.journal-box{
+  width:92%;
+  max-width:760px;
+  background:#fff;
+  border-radius:12px;
+  padding:16px;
+  max-height:84vh;
+  overflow:auto;
+  box-shadow:0 30px 80px rgba(0,0,0,0.2)
+}
+.journal-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:12px
+}
+.journal-item{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:10px;
+  border-radius:10px;
+  border:1px solid #eee;
+  margin-bottom:8px
+}
+.journal-item .meta{
+  font-size:13px;
+  color:#666
+}
+.btn-small{
+  padding:6px 10px;
+  border-radius:8px;
+  border:1px solid #ddd;
+  background:white;
+  cursor:pointer;
+  margin-left:8px
+}
+
+.saved-preview-list{
+  margin-top:18px;
+  display:flex;
+  flex-direction:column;
+  gap:12px
+}
+.saved-card{
+  background:#fff;
+  border-radius:10px;
+  padding:12px;
+  border:1px solid rgba(0,0,0,0.06);
+  box-shadow:0 6px 18px rgba(0,0,0,0.04);
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;gap:12px
+}
+.saved-card .meta{
+  font-weight:600;
+  margin-bottom:6px
+}
+.saved-card .snippet{
+  font-size:13px;
+  color:#666;
+  max-width:72%
+}
+.saved-card .actions{
+  display:flex;
+  flex-direction:column;
+  gap:8px
+}
+.saved-card .actions button{
+  padding:6px 10px;
+  border-radius:8px;
+  border:1px solid #ddd;
+  background:white;cursor:pointer
+}
+
+@media(max-width:820px){.page{width:92vw}.left-col,.right-col{float:none;width:100%;padding:0}.spiral,.spiral-right,.binder-holes{display:none}}
+</style>
+</head>
+<body>
+  
+<div class="app">
+  <div class="header-row">
+    <div>
+      <div style="
+        font-size:30px;
+        font-weight:800;
+        letter-spacing:1px;
+        color:#7a61a9;
+        text-transform:capitalize;
+        line-height:1.2;
+      ">
+        Daily Routine
+      </div>
+    </div>
+
+    <div style="display:flex;gap:8px;align-items:center">
+     <select id="paperTheme" class="ctrl-btn" title="Tema halaman">
+  <option value="spiral-left">Spiral Kiri</option>
+  <option value="spiral-right">Spiral Kanan</option>
+  <option value="spiral-thick">Spiral Tebal</option>
+  <option value="binder">Binder</option>
+  <option value="ruled">Ruled</option>
+  <option value="grid">Grid</option>
+  <option value="dot">Dot</option>
+  <option value="cloud">Cloud</option>
+  <option value="clean">Clean</option>
+</select>
+    </div>
+  </div>
+
+  <div class="note-wrap">
+    <div class="spiral" id="spiralLeft"><div class="coil"></div><div class="coil"></div><div class="coil"></div><div class="coil"></div><div class="coil"></div><div class="coil"></div></div>
+    <div class="spiral spiral-right" id="spiralRight" style="display:none"><div class="coil"></div><div class="coil"></div><div class="coil"></div><div class="coil"></div><div class="coil"></div><div class="coil"></div></div>
+    <div class="spiral spiral-thick" id="spiralThick" style="display:none"><div class="coil"></div><div class="coil"></div><div class="coil"></div><div class="coil"></div><div class="coil"></div><div class="coil"></div></div>
+    <div class="binder-holes" id="binderHoles" style="display:none"><div class="hole"></div><div class="hole"></div><div class="hole"></div><div class="hole"></div><div class="hole"></div><div class="hole"></div></div>
+
+    <div class="page" id="page">
+      <div class="page-title">Daily Routine</div>
+      <div class="left-col">
+        <div id="box-mood" class="mood-box box paper-pad paper-lavender" data-box="mood">
+          <div class="theme-control" data-box="mood" title="Ubah tema">🎨</div>
+          <div class="theme-select" data-box="mood"><select class="theme-chooser"></select></div>
+          <div style="font-weight:600;margin-bottom:8px">Mood</div>
+          <div style="display:flex;gap:8px">
+            <div class="face" data-mood="very_happy">😊</div><div class="face" data-mood="happy">🙂</div><div class="face" data-mood="neutral">😐</div><div class="face" data-mood="sad">☹️</div>
+          </div>
+        </div>
+
+        <div style="height:10px"></div>
+        <div id="box-todo" class="todo-wrapper box paper-pad paper-cream" data-box="todo">
+          <div class="theme-control" data-box="todo" title="Ubah tema">🎨</div>
+          <div class="theme-select" data-box="todo"><select class="theme-chooser"></select></div>
+          <div class="section-title">To Do List</div>
+          <ul class="todo-list" id="todoList"></ul>
+        </div>
+
+        <div style="height:12px"></div>
+        <div id="box-goals" class="goals-box box paper-pad paper-green" data-box="goals">
+          <div class="theme-control" data-box="goals" title="Ubah tema">🎨</div>
+          <div class="theme-select" data-box="goals"><select class="theme-chooser"></select></div>
+          <div class="section-title">Goals</div>
+          <div contenteditable="true" data-edit="goals" id="goalsBox">Tulis goalsmu di sini...</div>
+        </div>
+
+        <div style="height:12px"></div>
+        <div id="box-prod" class="prod-row box paper-pad paper-ruled" data-box="prod">
+          <div class="theme-control" data-box="prod" title="Ubah tema">🎨</div>
+          <div class="theme-select" data-box="prod"><select class="theme-chooser"></select></div>
+          <div style="align-self:center">Productivity</div>
+          <div style="display:flex;gap:8px">
+            <div class="star" data-star="1">☆</div><div class="star" data-star="2">☆</div><div class="star" data-star="3">☆</div><div class="star" data-star="4">☆</div><div class="star" data-star="5">☆</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="right-col">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div class="date-pill">Date: <span id="dateSpan" contenteditable="true" data-edit="date"></span></div>
+          <div style="display:flex;gap:8px;">
+            <button class="small-ctrl" data-action="save">Simpan</button>
+          </div>
+        </div>
+
+        <div style="height:12px"></div>
+        <div id="box-morning" class="rbox box paper-pad paper-kraft" data-box="morning">
+          <div class="theme-control" data-box="morning" title="Ubah tema">🎨</div>
+          <div class="theme-select" data-box="morning"><select class="theme-chooser"></select></div>
+          <div style="font-weight:700;margin-bottom:6px">Morning Routine</div>
+          <label style="display:flex;gap:8px;align-items:center;"><input type="checkbox" data-input="m_exercise"><div class="todo-item" contenteditable="true" data-edit="mor_ex">Exercise</div></label>
+          <label style="display:flex;gap:8px;align-items:center;"><input type="checkbox" data-input="m_self"><div class="todo-item" contenteditable="true" data-edit="mor_self">Self-care</div></label>
+          <label style="display:flex;gap:8px;align-items:center;"><input type="checkbox" data-input="m_breakfast"><div class="todo-item" contenteditable="true" data-edit="mor_break">Breakfast</div></label>
+          <label style="display:flex;gap:8px;align-items:center;"><input type="checkbox" data-input="m_medic"><div class="todo-item" contenteditable="true" data-edit="mor_medic">Medicine</div></label>
+        </div>
+
+        <div style="height:12px"></div>
+        <div id="box-grat" class="gratitude box paper-pad paper-blue-scrap" data-box="gratitude">
+          <div class="theme-control" data-box="gratitude" title="Ubah tema">🎨</div>
+          <div class="theme-select" data-box="gratitude"><select class="theme-chooser"></select></div>
+          <div style="font-weight:700;margin-bottom:8px">I am Grateful for</div>
+          <div contenteditable="true" data-edit="gratitude">Saya bersyukur untuk...</div>
+        </div>
+
+        <div style="height:12px"></div>
+        <div id="box-sleep" class="box paper-pad paper-cloud" data-box="sleep">
+          <div class="theme-control" data-box="sleep" title="Ubah tema">🎨</div>
+          <div class="theme-select" data-box="sleep"><select class="theme-chooser"></select></div>
+          <div style="font-weight:700;margin-bottom:8px">Hours of Sleep</div>
+          <div class="clouds" data-edit="sleep">
+            <div class="cloud" data-sleep="4-6">4–6</div><div class="cloud" data-sleep="7-9">7–9</div><div class="cloud" data-sleep="10-12">10–12</div>
+          </div>
+        </div>
+
+        <div style="height:12px"></div>
+        <div id="box-affirm" class="affirm box paper-pad paper-pink" data-box="affirm">
+          <div class="theme-control" data-box="affirm" title="Ubah tema">🎨</div>
+          <div class="theme-select" data-box="affirm"><select class="theme-chooser"></select></div>
+          <div style="font-weight:700;margin-bottom:8px">Affirmations</div>
+          <div contenteditable="true" data-edit="affirm">Saya mampu. Saya fokus. Saya tenang.</div>
+        </div>
+      </div>
+
+      <div class="page-bottom">
+        <div style="font-size:13px;color:var(--muted)">Productivity • Tap 1–5</div>
+        <div style="font-size:13px;color:var(--muted)">Swipe ⟵ Page 1/1</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="savedPreview" class="saved-preview-list" aria-live="polite"></div>
+
+</div>
+<script>
+const KEY = "daily_notebook_v3";
+const THEME_KEY_PREFIX = "daily_notebook_v3_box_theme_";
+const BOXES = {"mood":"box-mood","todo":"box-todo","goals":"box-goals","prod":"box-prod","morning":"box-morning","gratitude":"box-grat","sleep":"box-sleep","affirm":"box-affirm"};
+const THEMES = [{v:"paper-cream",label:"Cream"},{v:"paper-pink",label:"Pink"},{v:"paper-blue-scrap",label:"Blue Scrap"},{v:"paper-kraft",label:"Kraft"},{v:"paper-green",label:"Green"},{v:"paper-ruled",label:"Ruled"},{v:"paper-dotted",label:"Dotted"},{v:"paper-grid",label:"Grid"},{v:"paper-lavender",label:"Lavender"},{v:"paper-cloud",label:"Cloud"}];
+const DEFAULT_BOX_THEME = {"mood":"paper-lavender","todo":"paper-cream","goals":"paper-green","prod":"paper-ruled","morning":"paper-kraft","gratitude":"paper-blue-scrap","sleep":"paper-cloud","affirm":"paper-pink"};
+
+let state = JSON.parse(localStorage.getItem(KEY) || "{}");
+if(!state.items){
+  state = {
+    items:Array.from({length:8}).map(()=>({text:"",checked:false})),
+    goals:"Tulis goalsmu di sini...",
+    date:new Date().toLocaleDateString(),
+    morning:{ex:false,self:false,break:false,med:false},
+    gratitude:"Saya bersyukur untuk...",
+    productivity:0,
+    mood:"",
+    sleep:"",
+    affirm:"Saya mampu. Saya fokus. Saya tenang.",
+    pageTheme:"spiral-left",
+    applyPageThemeToBoxes:false,
+    _journal:[],
+    _saved:[] 
+  };
+  saveState();
+} else {
+  state._saved = state._saved || [];
+  state._journal = state._journal || [];
+}
+
+function saveState(){ localStorage.setItem(KEY, JSON.stringify(state)); }
+
+
+function syncFromDOM(){
+  document.querySelectorAll('[data-edit]').forEach(el=>{
+    const k = el.dataset.edit;
+    if(!k) return;
+    if(k.startsWith('todo_')) {
+      const i = parseInt(k.split('_')[1]);
+      if(!isNaN(i) && state.items[i]) state.items[i].text = el.innerHTML;
+    } else if(k === 'goals') state.goals = el.innerHTML;
+    else if(k === 'gratitude') state.gratitude = el.innerHTML;
+    else if(k === 'affirm') state.affirm = el.innerHTML;
+    else if(k === 'date') state.date = el.innerText;
+  });
+
+  const m_ex = document.querySelector('[data-input="m_exercise"]');
+  const m_self = document.querySelector('[data-input="m_self"]');
+  const m_break = document.querySelector('[data-input="m_breakfast"]');
+  const m_medic = document.querySelector('[data-input="m_medic"]');
+  if(m_ex) state.morning.ex = !!m_ex.checked;
+  if(m_self) state.morning.self = !!m_self.checked;
+  if(m_break) state.morning.break = !!m_break.checked;
+  if(m_medic) state.morning.med = !!m_medic.checked;
+
+  document.querySelectorAll('[data-input^="todo_"]').forEach(inp=>{
+    const k = inp.dataset.input;
+    const i = parseInt(k.split('_')[1]);
+    if(!isNaN(i) && state.items[i]) state.items[i].checked = !!inp.checked;
+  });
+
+  let prod = 0;
+  document.querySelectorAll('[data-star]').forEach(s=>{
+    if(s.classList.contains('active')) prod = Math.max(prod, parseInt(s.dataset.star));
+  });
+  state.productivity = prod;
+
+  const activeMood = document.querySelector('.face.active');
+  state.mood = activeMood ? activeMood.dataset.mood : "";
+
+  const activeSleep = document.querySelector('.cloud.active');
+  state.sleep = activeSleep ? activeSleep.dataset.sleep : (state.sleep || "");
+
+  const themeSel = document.getElementById('paperTheme');
+  if(themeSel) state.pageTheme = themeSel.value;
+
+  document.querySelectorAll('[data-edit^="todo_"]').forEach(el=>{
+    const k = el.dataset.edit;
+    if(k && k.startsWith('todo_')){
+      const i = parseInt(k.split('_')[1]);
+      if(!isNaN(i) && state.items[i]) state.items[i].text = el.innerHTML;
+    }
+  });
+}
+
+const todoList = document.getElementById("todoList");
+const dateSpan = document.getElementById("dateSpan");
+const themeSel = document.getElementById("paperTheme");
+const spiralLeft = document.getElementById("spiralLeft");
+const spiralRight = document.getElementById("spiralRight");
+const spiralThick = document.getElementById("spiralThick");
+const binderHoles = document.getElementById("binderHoles");
+const savedPreviewContainer = document.getElementById("savedPreview");
+
+function renderTodo(){
+  todoList.innerHTML="";
+  state.items.forEach((it,i)=>{
+    const li = document.createElement("li");
+    li.innerHTML = `<label style="display:flex;gap:10px;align-items:center;"><input type="checkbox" data-input="todo_${i}"><div class="todo-item" data-edit="todo_${i}" contenteditable="true">${it.text||""}</div></label>`;
+    todoList.appendChild(li);
+  });
+  wireEditables(document);
+}
+renderTodo();
+
+function wireEditables(root){
+  root.querySelectorAll("[data-edit]").forEach(el=>{
+    const key=el.dataset.edit;
+    if(key&&key.startsWith("todo_")){ const i=parseInt(key.split("_")[1]); el.innerHTML=state.items[i].text||""; }
+    if(key==="goals") el.innerHTML=state.goals||"";
+    if(key==="gratitude") el.innerHTML=state.gratitude||"";
+    if(key==="affirm") el.innerHTML=state.affirm||"";
+    if(key==="date") el.innerText=state.date||"";
+    el.oninput = debounce(()=>{ 
+      if(key&&key.startsWith("todo_")){ const i=parseInt(key.split("_")[1]); state.items[i].text=el.innerHTML; } 
+      else if(key==="goals") state.goals=el.innerHTML; 
+      else if(key==="gratitude") state.gratitude=el.innerHTML; 
+      else if(key==="affirm") state.affirm=el.innerHTML; 
+      else if(key==="date") state.date=el.innerText; 
+      saveState(); 
+      renderSavedPreviews(); 
+    },300);
+  });
+
+  root.querySelectorAll("[data-input]").forEach(inp=>{
+    const k=inp.dataset.input;
+    if(k&&k.startsWith("todo_")){ const i=parseInt(k.split("_")[1]); inp.checked=!!state.items[i].checked; inp.onchange=()=>{ state.items[i].checked=inp.checked; saveState(); renderSavedPreviews(); }; }
+    else{ if(k==="m_exercise"){ inp.checked=!!state.morning.ex; inp.onchange=()=>{ state.morning.ex=inp.checked; saveState(); renderSavedPreviews(); } }
+      if(k==="m_self"){ inp.checked=!!state.morning.self; inp.onchange=()=>{ state.morning.self=inp.checked; saveState(); renderSavedPreviews(); } }
+      if(k==="m_breakfast"){ inp.checked=!!state.morning.break; inp.onchange=()=>{ state.morning.break=inp.checked; saveState(); renderSavedPreviews(); } }
+      if(k==="m_medic"){ inp.checked=!!state.morning.med; inp.onchange=()=>{ state.morning.med=inp.checked; saveState(); renderSavedPreviews(); } } }
+  });
+
+  root.querySelectorAll("[data-star]").forEach(s=>{ const n=parseInt(s.dataset.star); s.classList.toggle("active", state.productivity>=n); s.onclick=()=>{ state.productivity=n; wireEditables(root); saveState(); renderSavedPreviews(); }; });
+  root.querySelectorAll(".face[data-mood]").forEach(f=>{ f.classList.toggle("active", state.mood===f.dataset.mood); f.onclick=()=>{ state.mood=f.dataset.mood; root.querySelectorAll(".face[data-mood]").forEach(x=>x.classList.remove("active")); f.classList.add("active"); saveState(); renderSavedPreviews(); }; });
+  root.querySelectorAll(".cloud").forEach(c=>{ c.classList.toggle("active", state.sleep===c.dataset.sleep); c.onclick=()=>{ state.sleep=c.dataset.sleep; c.parentElement.querySelectorAll(".cloud").forEach(x=>x.classList.remove("active")); c.classList.add("active"); saveState(); renderSavedPreviews(); }; });
+}
+wireEditables(document);
+
+function debounce(fn,wait=300){ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a),wait); }; }
+
+function applyPageTheme(){
+  const t = state.pageTheme || "spiral-left";
+  document.getElementById("page").classList.remove("theme-grid","theme-ruled","theme-dot","theme-binder","paper-grid","paper-ruled","paper-dotted","paper-cloud");
+  spiralLeft.style.display="none"; spiralRight.style.display="none"; spiralThick.style.display="none"; binderHoles.style.display="none";
+  if(t==="spiral-left") spiralLeft.style.display="";
+  if(t==="spiral-right") spiralRight.style.display="";
+  if(t==="spiral-thick") spiralThick.style.display="";
+  if(t==="binder"){ binderHoles.style.display=""; document.getElementById("page").classList.add("theme-binder"); }
+  if(t==="ruled") document.getElementById("page").classList.add("theme-ruled");
+  if(t==="grid") document.getElementById("page").classList.add("theme-grid");
+  if(t==="dot") document.getElementById("page").classList.add("theme-dot");
+  if(t==="cloud") document.getElementById("page").classList.add("paper-cloud");
+  themeSel.value = t;
+  if(state.applyPageThemeToBoxes){ const map={"ruled":"paper-ruled","grid":"paper-grid","dot":"paper-dotted","cloud":"paper-cloud","binder":"paper-kraft"}; const cls=map[t]||null; if(cls){ Object.values(BOXES).forEach(id=>{ const el=document.getElementById(id); if(!el) return; Array.from(el.classList).forEach(cl=>{ if(cl.startsWith("paper-")) el.classList.remove(cl); }); el.classList.add(cls); }); } } else restoreAllBoxThemes();
+}
+applyPageTheme();
+themeSel.onchange = ()=>{ state.pageTheme=themeSel.value; applyPageTheme(); saveState(); renderSavedPreviews(); };
+
+function initBoxThemeControls(){
+  Object.keys(BOXES).forEach(boxKey=>{
+    const id=BOXES[boxKey], el=document.getElementById(id); if(!el) return; el.classList.add("paper-pad");
+    const ctrl = el.querySelector('.theme-control[data-box="'+boxKey+'"]');
+    const selWrap = el.querySelector('.theme-select[data-box="'+boxKey+'"]');
+    const sel = selWrap.querySelector('select.theme-chooser');
+    THEMES.forEach(t=>{ const opt=document.createElement('option'); opt.value=t.v; opt.textContent=t.label; sel.appendChild(opt); });
+    const saved = localStorage.getItem(THEME_KEY_PREFIX + boxKey);
+    const startTheme = saved || DEFAULT_BOX_THEME[boxKey] || "paper-cream";
+    applyBoxThemeToElement(el,startTheme);
+    sel.value = startTheme;
+    ctrl.addEventListener('click', (e)=>{ e.stopPropagation(); document.querySelectorAll('.theme-select').forEach(w=>{ if(w!==selWrap) w.style.display='none'; }); selWrap.style.display = (selWrap.style.display==='block') ? 'none' : 'block'; });
+    sel.addEventListener('change', ()=>{ const val=sel.value; applyBoxThemeToElement(el,val); localStorage.setItem(THEME_KEY_PREFIX + boxKey, val); selWrap.style.display='none'; renderSavedPreviews(); });
+  });
+  document.addEventListener('click', ()=> document.querySelectorAll('.theme-select').forEach(w=> w.style.display='none'));
+}
+function applyBoxThemeToElement(el,themeClass){ Array.from(el.classList).forEach(cl=>{ if(cl.startsWith('paper-')) el.classList.remove(cl); }); if(themeClass) el.classList.add(themeClass); }
+function restoreAllBoxThemes(){ Object.keys(BOXES).forEach(boxKey=>{ const id=BOXES[boxKey]; const el=document.getElementById(id); if(!el) return; const saved = localStorage.getItem(THEME_KEY_PREFIX + boxKey); const themeToApply = saved || DEFAULT_BOX_THEME[boxKey] || "paper-cream"; applyBoxThemeToElement(el, themeToApply); const inner = el.querySelector('.todo-wrapper, .goals-box, .rbox, .gratitude, .prod-row, .affirm, .mood-box, .clouds'); if(inner) inner.classList.add('paper-pad'); }); }
+initBoxThemeControls(); restoreAllBoxThemes();
+
+document.querySelectorAll('[data-action]').forEach(btn=> btn.onclick = ()=>{
+  const a = btn.getAttribute('data-action');
+  if(a==='save'){
+    syncFromDOM();
+    const snap = JSON.parse(JSON.stringify(state));
+    const entry = { id: Date.now(), date: snap.date || new Date().toLocaleDateString(), mood: snap.mood||"", productivity: snap.productivity||0, snapshot: snap };
+    state._saved.unshift(entry);
+    saveState();
+    renderSavedPreviews();
+    alert('Halaman disimpan (preview dibuat di bawah)');
+  }
+});
+
+document.getElementById('resetBtn').onclick = ()=>{ if(confirm('Hapus semua data lokal (localStorage) termasuk tema kotak?')){ Object.keys(BOXES).forEach(boxKey=> localStorage.removeItem(THEME_KEY_PREFIX + boxKey)); localStorage.removeItem(KEY); location.reload(); } };
+document.getElementById('exportPdf').onclick = ()=> window.print();
+
+window.addEventListener('beforeunload', ()=>{
+  syncFromDOM();
+  saveState();
+});
+
+dateSpan.innerText = state.date || new Date().toLocaleDateString();
+
+const journalModal = document.getElementById('journalModal');
+const openJournal = document.getElementById('openJournal');
+const closeJournal = document.getElementById('closeJournal');
+const journalList = document.getElementById('journalList');
+const journalEmpty = document.getElementById('journalEmpty');
+openJournal.onclick = ()=>{ renderJournalList(); journalModal.style.display='flex'; journalModal.setAttribute('aria-hidden','false'); };
+closeJournal.onclick = ()=>{ journalModal.style.display='none'; journalModal.setAttribute('aria-hidden','true'); };
+document.getElementById('clearJournal').onclick = ()=>{ if(!state._journal || !state._journal.length) return alert('Journal kosong'); if(confirm('Hapus semua entry journal?')){ state._journal=[]; saveState(); renderJournalList(); } };
+
+function renderJournalList(){
+  journalList.innerHTML = "";
+  const arr = state._journal || [];
+  if(!arr.length){ journalEmpty.style.display='block'; return; } else journalEmpty.style.display='none';
+  arr.forEach((e,idx)=>{
+    const div = document.createElement('div'); div.className='journal-item';
+    const left = document.createElement('div'); left.innerHTML = `<div style="font-weight:600">${e.date}</div><div class="meta">Mood: ${e.mood||'-'} • Prod: ${e.productivity||0}/5</div>`;
+    const right = document.createElement('div');
+    const openBtn = document.createElement('button'); openBtn.className='btn-small'; openBtn.textContent='Open';
+    openBtn.onclick = ()=>{ // load snapshot into state and UI
+      state = JSON.parse(JSON.stringify(e.snapshot)); saveState(); applyPageTheme(); renderTodo(); wireEditables(document); dateSpan.innerText = state.date; alert('Entry dimuat ke halaman (kamu bisa edit dan simpan)'); journalModal.style.display='none';
+    };
+    const delBtn = document.createElement('button'); delBtn.className='btn-small'; delBtn.textContent='Delete';
+    delBtn.onclick = ()=>{ if(confirm('Hapus entry ini?')){ state._journal.splice(idx,1); saveState(); renderJournalList(); } };
+    right.appendChild(openBtn); right.appendChild(delBtn);
+    div.appendChild(left); div.appendChild(right); journalList.appendChild(div);
+  });
+}
+renderJournalList();
+
+function renderSavedPreviews(){
+  savedPreviewContainer.innerHTML = "";
+  const arr = state._saved || [];
+  if(!arr.length){
+    return;
+  }
+  arr.forEach((e, idx)=>{
+    const card = document.createElement('div');
+    card.className = 'saved-card';
+    const left = document.createElement('div');
+    left.style.flex = '1';
+    left.innerHTML = `<div class="meta">${e.date}</div>
+      <div class="snippet">
+        <div style="margin-bottom:6px"><strong>Mood:</strong> ${e.mood || '-' } • <strong>Prod:</strong> ${e.productivity||0}/5</div>
+        <div><strong>Goals:</strong> ${escapeText(getSafe(e.snapshot.goals))}</div>
+        <div style="margin-top:6px"><strong>Gratitude:</strong> ${escapeText(getSafe(e.snapshot.gratitude))}</div>
+      </div>`;
+    const right = document.createElement('div');
+    right.className = 'actions';
+    const editBtn = document.createElement('button'); editBtn.textContent = 'Edit';
+    editBtn.onclick = ()=>{
+      state = JSON.parse(JSON.stringify(e.snapshot));
+      saveState();
+      applyPageTheme();
+      renderTodo();
+      wireEditables(document);
+      dateSpan.innerText = state.date;
+      window.scrollTo({top:0,behavior:'smooth'});
+    };
+    const delBtn = document.createElement('button'); delBtn.textContent = 'Delete';
+    delBtn.onclick = ()=>{
+      if(!confirm('Hapus preview ini?')) return;
+      state._saved.splice(idx,1);
+      saveState();
+      renderSavedPreviews();
+    };
+    right.appendChild(editBtn);
+    right.appendChild(delBtn);
+    card.appendChild(left);
+    card.appendChild(right);
+    savedPreviewContainer.appendChild(card);
+  });
+}
+
+function getSafe(val){
+  if(!val) return '';
+  const tmp = document.createElement('div');
+  tmp.innerHTML = val;
+  let t = tmp.innerText || tmp.textContent || '';
+  if(t.length > 160) t = t.slice(0,160) + '...';
+  return t;
+}
+function escapeText(s){
+  if(!s) return '';
+  return s.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,' ');
+}
+
+renderSavedPreviews();
+
+journalModal.addEventListener('click', (e)=>{ if(e.target===journalModal) journalModal.style.display='none'; });
+
+window.addEventListener('resize', ()=> document.querySelectorAll('.theme-select').forEach(w=> w.style.display='none'));
+</script>
+</body>
+</html>

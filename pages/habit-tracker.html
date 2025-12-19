@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Habit Tracker – Soft Pink</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link href="https://fonts.googleapis.com/css2?family=Zen+Serif:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root {
+    --primary: #f2a1b3;        
+    --secondary: #f6c1cd;      
+    --accent: #fff1f4;        
+
+    --bg-main: #fff7f9;
+    --card-bg: rgba(255,255,255,0.88);
+
+    --gradient: linear-gradient(135deg, #f2a1b3, #f6c1cd);
+
+    --radius: 18px;
+    --glass: blur(14px) saturate(145%);
+    --text-dark: #3a2a2f;
+    --text-soft: #8b6b75;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 22px;
+    font-family: "Zen Serif", serif;
+    background: linear-gradient(135deg, #fff7f9, #fff0f4);
+    color: var(--text-dark);
+}
+
+h2 {
+    text-align: center;
+    font-size: 30px;
+    font-weight: 700;
+    margin-bottom: 22px;
+}
+
+.habit-card {
+    background: var(--card-bg);
+    backdrop-filter: var(--glass);
+    border-radius: var(--radius);
+    padding: 22px;
+    margin-bottom: 26px;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.05);
+    animation: fade .35s ease;
+}
+
+@keyframes fade {
+    from {opacity:0; transform:translateY(10px)}
+    to {opacity:1; transform:none}
+}
+
+.habit-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.habit-title {
+    display: flex;
+    align-items: center;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.emoji {
+    margin-right: 10px;
+    font-size: 24px;
+}
+
+.remove-btn {
+    background: none;
+    border: none;
+    font-size: 22px;
+    cursor: pointer;
+    color: #ec6f9b;
+}
+
+.calendar {
+    margin-top: 14px;
+    display: grid;
+    grid-template-columns: repeat(15, 1fr);
+    gap: 6px;
+}
+
+.day {
+    width: 100%;
+    padding-bottom: 100%;
+    background: #f8dfe6;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: .2s;
+}
+
+.day.active {
+    background: linear-gradient(135deg, #f2a1b3, #f6c1cd);
+}
+
+.add-box {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.add-box input,
+.add-box select {
+    padding: 14px;
+    border: none;
+    border-radius: 14px;
+    flex: 1;
+    background: white;
+    font-size: 14px;
+}
+
+.add-box button {
+    padding: 14px 22px;
+    border: none;
+    border-radius: 14px;
+    background: var(--gradient);
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.filter-btn {
+    padding: 10px 16px;
+    border-radius: 999px;
+    border: none;
+    background: #fde8ee;
+    cursor: pointer;
+    font-weight: 500;
+    color: var(--text-soft);
+}
+
+.filter-btn.active {
+    background: var(--primary);
+    color: white;
+}
+
+.reset-btn {
+    width: 100%;
+    padding: 16px;
+    border: none;
+    border-radius: 16px;
+    background: var(--primary);
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+#emojiPicker {
+    position: fixed;
+    bottom: 28px;
+    left: 50%;
+    transform: translateX(-50%) scale(0);
+    background: white;
+    padding: 16px;
+    border-radius: 16px;
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 10px;
+    transition: .25s;
+    box-shadow: 0 14px 34px rgba(0,0,0,0.08);
+}
+</style>
+</head>
+
+<body>
+
+<h2>Habit Tracker</h2>
+
+<div style="display:flex;gap:10px;margin-bottom:18px;overflow-x:auto">
+    <button class="filter-btn active" onclick="filterCategory('all',event)">All</button>
+    <button class="filter-btn" onclick="filterCategory('health',event)">Health</button>
+    <button class="filter-btn" onclick="filterCategory('study',event)">Study</button>
+    <button class="filter-btn" onclick="filterCategory('work',event)">Work</button>
+    <button class="filter-btn" onclick="filterCategory('selfcare',event)">Self Care</button>
+</div>
+
+<div id="habitList"></div>
+
+<div class="add-box">
+    <input id="habitInput" placeholder="Nama kebiasaan">
+    <input id="emojiInput" placeholder="Emoji" readonly onclick="openEmojiPicker()" style="width:80px;text-align:center">
+    <select id="categoryInput">
+        <option value="health">Health</option>
+        <option value="study">Study</option>
+        <option value="work">Work</option>
+        <option value="selfcare">Self Care</option>
+    </select>
+    <button onclick="addHabit()">Tambah</button>
+</div>
+
+<button class="reset-btn" onclick="resetAll()">Reset Semua</button>
+
+<div id="emojiPicker"></div>
+
+<script>
+const KEY = "habit_soft_pink";
+let habits = JSON.parse(localStorage.getItem(KEY) || "[]");
+let currentFilter = "all";
+const EMOJIS = ["⭐","🔥","💪","📚","🧘","🏃","❤️","🌸","🎀"];
+
+function save() {
+  localStorage.setItem(KEY, JSON.stringify(habits));
+}
+
+function last30() {
+  let a = [], n = new Date();
+  for (let i = 29; i >= 0; i--) {
+    let d = new Date();
+    d.setDate(n.getDate() - i);
+    a.push(d.toISOString().slice(0, 10));
+  }
+  return a;
+}
+
+function addHabit() {
+  if (!habitInput.value.trim()) return alert("Nama wajib diisi");
+  habits.push({
+    name: habitInput.value,
+    emoji: emojiInput.value || "⭐",
+    category: categoryInput.value,
+    done: []
+  });
+  habitInput.value = "";
+  emojiInput.value = "";
+  save();
+  render();
+}
+
+function toggleDay(i, d) {
+  let h = habits[i];
+  let idx = h.done.indexOf(d);
+  idx === -1 ? h.done.push(d) : h.done.splice(idx, 1);
+  save();
+  render();
+}
+
+function filterCategory(c, e) {
+  currentFilter = c;
+  document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+  e.target.classList.add("active");
+  render();
+}
+
+function render() {
+  habitList.innerHTML = "";
+  habits.forEach((h, i) => {
+    if (currentFilter !== "all" && h.category !== currentFilter) return;
+
+    let card = document.createElement("div");
+    card.className = "habit-card";
+    card.innerHTML = `
+      <div class="habit-header">
+        <div class="habit-title">
+          <span class="emoji">${h.emoji}</span>${h.name}
+        </div>
+        <button class="remove-btn" onclick="habits.splice(${i},1);save();render()">×</button>
+      </div>
+    `;
+
+    let cal = document.createElement("div");
+    cal.className = "calendar";
+    last30().forEach(d => {
+      let b = document.createElement("div");
+      b.className = "day" + (h.done.includes(d) ? " active" : "");
+      b.onclick = () => toggleDay(i, d);
+      cal.appendChild(b);
+    });
+
+    card.appendChild(cal);
+    habitList.appendChild(card);
+  });
+}
+
+function resetAll() {
+  if (!confirm("Reset semua progress?")) return;
+  habits.forEach(h => h.done = []);
+  save();
+  render();
+}
+
+function openEmojiPicker() {
+  emojiPicker.innerHTML = "";
+  EMOJIS.forEach(e => {
+    let d = document.createElement("div");
+    d.textContent = e;
+    d.style.cursor = "pointer";
+    d.onclick = () => {
+      emojiInput.value = e;
+      emojiPicker.style.transform = "translateX(-50%) scale(0)";
+    };
+    emojiPicker.appendChild(d);
+  });
+  emojiPicker.style.transform = "translateX(-50%) scale(1)";
+}
+
+window.onclick = e => {
+  if (!emojiPicker.contains(e.target) && e.target !== emojiInput) {
+    emojiPicker.style.transform = "translateX(-50%) scale(0)";
+  }
+};
+
+render();
+</script>
+
+</body>
+</html>

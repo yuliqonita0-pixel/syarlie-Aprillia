@@ -1,0 +1,844 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>painting</title>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Serif:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg-1:#fff1f8;
+  --bg-2:#e8f1ff;
+  --accent:#6c65d6;
+  --muted:#6f6b88;
+  --card-bg:rgba(255,255,255,0.72);
+  --glass-border:rgba(120,110,200,0.08);
+  --shadow:0 12px 30px rgba(30,20,80,0.08);
+  --radius:12px;--ease:cubic-bezier(.2,.9,.3,1);
+  --ui-scale:1;
+}
+.dark{
+  --bg-1:#0f0b1a;
+  --bg-2:#15122a;
+  --accent:#bfa8ff;
+  --muted:#b9b3d6;
+  --card-bg:rgba(255,255,255,0.04);
+  --glass-border:rgba(255,255,255,0.06);
+  --shadow:0 18px 50px rgba(5,5,10,0.6);
+}
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  font-family:"Zen Serif", serif;
+  color:var(--muted);
+  background:linear-gradient(120deg,var(--bg-1),var(--bg-2));
+  transition:  background-sizecover
+.45s,color .45s;
+  font-size:calc(14px*var(--ui-scale));
+}
+.app{
+  max-width:1200px;
+  margin:20px auto;
+  padding:18px;
+  display:grid;
+  grid-template-columns:1fr 320px;
+  gap:18px;
+  align-items:start;
+}
+.header{
+  grid-column:1/-1;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+}
+.brand{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+.logo{
+  width:56px;
+  height:56px;
+  border-radius:12px;
+  background:linear-gradient(135deg,var(--accent),#a89fff);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:white;
+  font-weight:700;
+  box-shadow:var(--shadow);
+  font-size:18px;
+}
+.controls{
+  display:flex;
+  gap:8px;align-items:center;
+}
+.card{
+  background:var(--card-bg);
+  padding:12px;
+  border-radius:12px;
+  box-shadow:var(--shadow);
+  border:1px solid var(--glass-border);
+}
+
+.canvas-area{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+.canvas-toolbar{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  align-items:center;
+}
+#viewportWrap{
+  width:100%;
+  height:500px;
+  border-radius:10px;
+  border:1px solid #aaa;
+  overflow:hidden;
+  background:white;
+  position:relative;
+}
+#viewport{
+  position:absolute;
+  top:0;
+  left:0;
+  transform-origin:0 0;
+  will-change:transform;
+}
+.layerCanvas{
+  position:absolute;
+  top:0;
+  left:0;
+  user-select:none;
+  touch-action:none;
+}
+.canvas-meta{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex-wrap:wrap;
+}
+button, select, input[type=range], input[type=color], input[type=text], input[type=number]{padding:6px 8px;border-radius:8px;border:1px solid #aaa;font-size:0.95rem;background:white;}
+button{
+  background:linear-gradient(180deg,#a78bfa,#7c3aed);
+  color:white;
+  cursor:pointer;
+}
+button.alt{
+  background:#fff;
+  color:var(--muted);
+  border:1px solid #ccc;
+}
+.small{
+  padding:4px 6px;
+  font-size:0.9rem;
+}
+.side{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+.layer-list{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  max-height:260px;
+  overflow:auto;
+  padding-right:4px;
+}
+.layer-item{
+  display:flex;
+  align-items:center;
+  gap:8px;padding:8px;
+  border-radius:8px;
+  background:rgba(255,255,255,0.04);
+  border:1px solid rgba(0,0,0,0.03);
+}
+.layer-item input[type="text"]
+{flex:1;
+  padding:6px;
+  border-radius:6px;
+}
+.layer-controls{
+  display:flex;
+  gap:6px;
+  align-items:center;
+}
+#galleryList{
+  display:flex;
+  flex-direction:column;
+  gap:8px;max-height:220px;
+  overflow:auto;
+}
+.thumb{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:6px;
+  border-radius:8px;
+  border:1px solid #ddd;
+  background:#fff;
+}
+.note{
+  font-size:0.9rem;
+  color:var(--muted);
+}
+
+#brushPreview{
+  width:56px;
+  height:40px;
+  border:1px solid #ddd;
+  border-radius:6px;
+  background:#fff;
+  display:inline-block;
+  vertical-align:middle
+}
+
+@media(max-width:980px)
+{.app{grid-template-columns:1fr;}.header{flex-direction:column;align-items:flex-start;gap:8px}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="brand">
+      <div>
+        <h2 style="margin:0">Sketsa</h2>
+      </div>
+    </div>
+    <div class="controls">
+      <select id="themeSelect"><option value="">Default</option><option value="theme-mint">Mint</option><option value="theme-sakura">Sakura</option><option value="theme-cream">Cream</option></select>
+      <button id="darkToggle">🌙</button>
+      <button id="btnExportAll" class="small alt">Export All (PNG)</button>
+    </div>
+  </div>
+
+  <div class="canvas-area card">
+    <div class="canvas-toolbar">
+      <label>Tool:
+        <select id="tool">
+          <optgroup label="Pencil & Pen">
+            <option value="pencilGraphite">Pencil (Graphite)</option>
+            <option value="ink">Ink Pen</option>
+            <option value="calligraphy">Calligraphy</option>
+            <option value="eraser">Eraser</option>
+            <option value="text">Text</option>
+            <option value="bucket">Bucket Fill</option>
+          </optgroup>
+          <optgroup label="Effects">
+            <option value="airbrush">Airbrush</option>
+            <option value="glitter">Glitter</option>
+            <option value="cherry">Cherry Brush</option>
+          </optgroup>
+        </select>
+      </label>
+
+      <label>Warna: <input type="color" id="color" value="#000000"></label>
+      <label>Ukuran: <input type="range" id="size" min="1" max="120" value="6"></label>
+      <label>Smooth: <input type="range" id="smooth" min="0" max="1" step="0.05" value="0.5"></label>
+      <label>Pressure sim: <input type="checkbox" id="pressureSim" checked></label>
+
+      <div style="display:flex;gap:8px;align-items:center;">
+        <canvas id="brushPreview"></canvas>
+      </div>
+
+      <button id="addLayer">➕ Add Layer</button>
+      <button id="duplicateLayer">⎘ Duplicate</button>
+      <button id="mergeDown">⇩ Merge Down</button>
+      <button id="deleteLayer" class="alt">🗑️ Delete Layer</button>
+      <button id="deleteLastStroke" class="alt">✂️ Hapus Stroke Terakhir</button>
+      <button id="deleteAllSketches" class="alt">🧹 Hapus Semua Sketsa</button>
+      <button id="clear">Hapus Layer</button>
+      <button id="undo">↩️ Undo</button>
+      <button id="redo">↪️ Redo</button>
+      <button id="importImageBtn" class="small alt">📁 Import Image</button>
+      <input type="file" id="importImage" accept="image/*" style="display:none">
+      <button id="save">📥 Save to Gallery</button>
+
+      <div style="margin-left:auto;display:flex;gap:8px;align-items:center;">
+        <div class="note">Zoom: <span id="zoomLabel">100%</span></div>
+      </div>
+    </div>
+
+    <div id="viewportWrap">
+      <div id="viewport" style="width:800px;height:500px;">
+      </div>
+    </div>
+
+    <div class="canvas-meta">
+      <div class="note">Tips: Scroll utk zoom. Tekan spasi + drag utk pan. Mobile: pinch to zoom (basic).</div>
+    </div>
+  </div>
+
+  <div class="side">
+    <div class="card">
+      <h3 style="margin:0 0 8px 0">Layers</h3>
+      <div class="layer-list" id="layerList"></div>
+      <div style="display:flex;gap:8px;margin-top:8px;">
+        <button id="moveUp" class="small">↑</button>
+        <button id="moveDown" class="small">↓</button>
+        <button id="renameLayer" class="small alt">Rename Selected</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3 style="margin:0 0 8px 0">Gallery</h3>
+      <div id="galleryList"></div>
+      <div style="display:flex;gap:8px;margin-top:8px;">
+        <button id="exportSelected" class="small">Export Selected</button>
+        <button id="clearGallery" class="small alt">Clear Gallery</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3 style="margin:0 0 8px 0">Settings</h3>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <label>Background:
+          <select id="paper">
+            <option value="white">White</option>
+            <option value="lined">Lined</option>
+            <option value="dot">Dot Grid</option>
+            <option value="kraft">Kraft</option>
+          </select>
+        </label>
+        <label><input type="checkbox" id="showGrid"> Show grid</label>
+        <label>Auto-save (sec): <input type="number" id="autosave" min="0" value="15" style="width:80px"></label>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const CANVAS_W = 1600;
+const CANVAS_H = 1000;
+const MAX_UNDO = 200;
+const GALLERY_KEY = 'ubi_gallery_v1';
+const AUTOSAVE_KEY = 'ubi_autosave_v1';
+
+const viewport = document.getElementById('viewport');
+const viewportWrap = document.getElementById('viewportWrap');
+
+let layers = [];
+let currentLayerIndex = -1;
+let tool = 'pencilGraphite';
+let color = '#000';
+let baseSize = 6;
+let smoothFactor = 0.5;
+let pressureSim = true;
+
+let scale = 1;
+let translate = {x:0,y:0};
+let isPanning = false;
+let lastPan = null;
+let spaceDown = false;
+
+let drawing = false;
+let prevPoint = null;
+let lastVelocity = 0;
+
+let gallery = JSON.parse(localStorage.getItem(GALLERY_KEY) || '[]');
+
+let autosaveSec = parseInt(document.getElementById('autosave').value) || 15;
+let autosaveTimer = null;
+
+const brushPreview = document.getElementById('brushPreview');
+const bpCtx = brushPreview.getContext('2d');
+
+function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
+function uid(prefix='id'){return prefix+Math.random().toString(36).slice(2,9);}
+function setViewportTransform(){ viewport.style.transform = `translate(${translate.x}px, ${translate.y}px) scale(${scale})`; document.getElementById('zoomLabel').textContent = Math.round(scale*100)+'%'; }
+function screenToCanvas(x,y){
+  const rect = viewportWrap.getBoundingClientRect();
+  const vx = x - rect.left;
+  const vy = y - rect.top;
+  const cx = (vx - translate.x)/scale;
+  const cy = (vy - translate.y)/scale;
+  return {x: cx, y: cy};
+}
+
+function createLayer(name='Layer'){
+  const canvas = document.createElement('canvas');
+  canvas.width = CANVAS_W; canvas.height = CANVAS_H;
+  canvas.className = 'layerCanvas';
+  canvas.style.zIndex = layers.length;
+  canvas.style.left = '0px'; canvas.style.top = '0px';
+  canvas.style.width = CANVAS_W + 'px';
+  canvas.style.height = CANVAS_H + 'px';
+  const ctx = canvas.getContext('2d');
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  const layer = { id: uid('ly'), name, canvas, ctx, visible:true, locked:false, opacity:1, blend:'source-over', strokes:[], redo:[] };
+  layers.push(layer);
+  viewport.appendChild(canvas);
+  selectLayer(layers.length-1);
+  renderLayerList();
+  return layer;
+}
+
+function removeLayer(index){
+  if(index<0 || index>=layers.length) return;
+  const l = layers[index];
+  viewport.removeChild(l.canvas);
+  layers.splice(index,1);
+  currentLayerIndex = clamp(index-1, 0, layers.length-1);
+  renderLayerList();
+  refreshAll();
+}
+
+function duplicateLayer(index){
+  if(index<0 || index>=layers.length) return;
+  const src = layers[index];
+  const newL = createLayer(src.name+' copy');
+  newL.locked = src.locked; newL.opacity = src.opacity; newL.blend = src.blend;
+  newL.ctx.globalAlpha = src.opacity;
+  newL.ctx.drawImage(src.canvas,0,0);
+  newL.strokes = JSON.parse(JSON.stringify(src.strokes || []));
+  renderLayerList(); refreshAll();
+}
+
+function mergeDown(index){
+  if(index<=0 || index>=layers.length) return;
+  const top = layers[index], bottom = layers[index-1];
+  bottom.ctx.save();
+  bottom.ctx.globalAlpha = top.opacity;
+  bottom.ctx.globalCompositeOperation = top.blend || 'source-over';
+  bottom.ctx.drawImage(top.canvas,0,0);
+  bottom.ctx.restore();
+  removeLayer(index);
+  refreshAll();
+}
+
+function moveLayer(index,dir){
+  const to = index + dir;
+  if(to<0 || to>=layers.length) return;
+  const a = layers[index];
+  layers.splice(index,1);
+  layers.splice(to,0,a);
+  layers.forEach((l,i)=>l.canvas.style.zIndex=i);
+  currentLayerIndex = to;
+  renderLayerList();
+  refreshAll();
+}
+
+function selectLayer(index){
+  if(index<0 || index>=layers.length){ currentLayerIndex = -1; renderLayerList(); return; }
+  currentLayerIndex = index;
+  renderLayerList();
+}
+
+function refreshAll(){
+  layers.forEach(l=>{ l.canvas.style.display = l.visible ? 'block' : 'none'; l.canvas.style.opacity = l.opacity; });
+}
+
+function renderLayerList(){
+  const el = document.getElementById('layerList'); el.innerHTML = '';
+  layers.slice().reverse().forEach((l, revIndex)=>{
+    const index = layers.length - 1 - revIndex;
+    const item = document.createElement('div');
+    item.className = 'layer-item';
+    if(index === currentLayerIndex) item.style.outline = '2px solid rgba(124,58,237,0.25)';
+    item.innerHTML = `
+      <input type="text" data-idx="${index}" value="${l.name}">
+      <div style="display:flex;gap:6px;align-items:center;">
+        <input type="range" data-idx="${index}" class="op" min="0" max="1" step="0.01" value="${l.opacity}" style="width:60px">
+        <label><input type="checkbox" data-idx="${index}" class="lock" ${l.locked?'checked':''}>Lock</label>
+        <button data-idx="${index}" class="vis small">${l.visible? '👁️':'🚫'}</button>
+      </div>`;
+    el.appendChild(item);
+  });
+
+  el.querySelectorAll('input[type="text"]').forEach(inp=>{
+    inp.onchange = e=>{ const i = parseInt(e.target.dataset.idx); layers[i].name = e.target.value; renderLayerList(); };
+    inp.onclick = e=> selectLayer(parseInt(e.target.dataset.idx));
+  });
+  el.querySelectorAll('.op').forEach(r=> r.oninput = e=>{ const i = parseInt(e.target.dataset.idx); layers[i].opacity = parseFloat(e.target.value); layers[i].canvas.style.opacity = layers[i].opacity; });
+  el.querySelectorAll('.lock').forEach(ch=> ch.onchange = e=>{ const i = parseInt(e.target.dataset.idx); layers[i].locked = e.target.checked; renderLayerList(); });
+  el.querySelectorAll('.vis').forEach(btn=> btn.onclick = e=>{ const i = parseInt(e.target.dataset.idx); layers[i].visible = !layers[i].visible; renderLayerList(); refreshAll(); });
+}
+
+function beginStroke(x,y,meta){
+  if(currentLayerIndex<0) return;
+  const layer = layers[currentLayerIndex];
+  if(layer.locked) return;
+  if(tool === 'text'){
+    const txt = prompt('Tulis teks:');
+    if(txt !== null){
+      layer.ctx.save();
+      layer.ctx.fillStyle = color;
+      const size = parseInt(document.getElementById('size').value) || 20;
+      layer.ctx.font = `${size*1.6}px Poppins, sans-serif`;
+      layer.ctx.fillText(txt, x, y);
+      layer.ctx.restore();
+      layer.strokes.push({id: uid('s'), tool:'text', text:txt, x, y, color, size});
+      if(layer.strokes.length > MAX_UNDO) layer.strokes.shift();
+    }
+    return;
+  }
+  if(tool === 'bucket'){
+    floodFillLayer(layer, Math.round(x), Math.round(y), hexToRgba(color));
+    layer.strokes.push({id:uid('s'), tool:'bucket', color, x, y});
+    if(layer.strokes.length > MAX_UNDO) layer.strokes.shift();
+    return;
+  }
+  drawing = true;
+  prevPoint = {x,y,t:Date.now()};
+  const stroke = {
+    id: uid('s'),
+    tool: tool,
+    color: color,
+    size: parseInt(document.getElementById('size').value) || 6,
+    points: [{x,y,velocity:0}],
+    composite: layers[currentLayerIndex].ctx.globalCompositeOperation || 'source-over'
+  };
+  layers[currentLayerIndex].strokes.push(stroke);
+  if(layers[currentLayerIndex].strokes.length > MAX_UNDO) layers[currentLayerIndex].strokes.shift();
+  layers[currentLayerIndex].redo = [];
+}
+
+function addPoint(x,y){
+  if(!drawing) return;
+  const layer = layers[currentLayerIndex];
+  const now = Date.now();
+  const last = prevPoint;
+  const dx = x - last.x, dy = y - last.y;
+  const dt = Math.max(1, now - last.t);
+  const velocity = Math.sqrt(dx*dx + dy*dy) / dt;
+  last.t = now; last.x = x; last.y = y; lastVelocity = velocity;
+  const stroke = layer.strokes[layer.strokes.length-1];
+  stroke.points.push({x,y,velocity});
+  drawStrokeSegment(layer.ctx, stroke, stroke.points.length-2, stroke.points.length-1);
+}
+
+function endStroke(){ drawing = false; prevPoint = null; }
+
+function drawStrokeSegment(ctx, stroke, i0, i1){
+  if(!stroke || !stroke.points) return;
+  const p0 = stroke.points[i0], p1 = stroke.points[i1];
+  if(!p0 || !p1) return;
+  ctx.save();
+  ctx.globalCompositeOperation = stroke.composite || 'source-over';
+  const midx = (p0.x + p1.x)/2, midy = (p0.y + p1.y)/2;
+  let v = p1.velocity || 0, pressure = 1;
+  if(pressureSim) pressure = clamp(1 - (v*10), 0.2, 1);
+  const sz = stroke.size * pressure;
+  ctx.strokeStyle = stroke.color; ctx.fillStyle = stroke.color; ctx.lineWidth = sz; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+
+  if(stroke.tool === 'glitter'){
+    for(let k=0;k<8;k++){ const rx = p1.x + (Math.random()-0.5)*20; const ry = p1.y + (Math.random()-0.5)*20; const r = Math.random()*sz*0.6; ctx.beginPath(); ctx.arc(rx,ry,r,0,Math.PI*2); ctx.fill(); }
+  } else if(stroke.tool === 'cherry'){
+    for(let k=0;k<3;k++){ ctx.beginPath(); ctx.arc(p1.x + (Math.random()-0.5)*20, p1.y + (Math.random()-0.5)*20, Math.random()*6+2,0,Math.PI*2); ctx.fillStyle = 'pink'; ctx.fill(); }
+  } else if(stroke.tool === 'eraser'){
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.beginPath(); ctx.moveTo(p0.x,p0.y); ctx.quadraticCurveTo(p0.x,p0.y, p1.x,p1.y); ctx.stroke();
+  } else {
+    ctx.beginPath(); ctx.moveTo(p0.x, p0.y); ctx.quadraticCurveTo(p0.x, p0.y, midx, midy); ctx.stroke();
+  }
+  ctx.restore();
+}
+
+function redrawLayer(layer){
+  const ctx = layer.ctx; ctx.clearRect(0,0,layer.canvas.width,layer.canvas.height);
+  for(const s of layer.strokes){
+    if(s.tool === 'text'){
+      ctx.save(); ctx.fillStyle = s.color; ctx.font = `${(s.size||20)*1.6}px Poppins, sans-serif`; ctx.fillText(s.text, s.x, s.y); ctx.restore();
+      continue;
+    }
+    for(let i=1;i<s.points.length;i++) drawStrokeSegment(ctx, s, i-1, i);
+  }
+}
+
+function deleteLastStroke(){
+  if(currentLayerIndex<0) return;
+  const l = layers[currentLayerIndex];
+  if(l.strokes.length === 0) return alert('Tidak ada stroke di layer ini');
+  l.strokes.pop();
+  l.redo = [];
+  redrawLayer(l);
+}
+
+function deleteAllSketches(){
+  if(!confirm('Hapus semua sketsa dari semua layer (kecuali yang dikunci)?')) return;
+  for(const l of layers){
+    if(l.locked) continue;
+    l.strokes = [];
+    l.redo = [];
+    l.ctx.clearRect(0,0,l.canvas.width,l.canvas.height);
+  }
+}
+
+function onPointerDown(e){
+  if(e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON' || e.target.tagName === 'SELECT') return;
+  if(spaceDown || e.button === 1){ isPanning = true; lastPan = {x: e.clientX, y: e.clientY}; viewportWrap.style.cursor = 'grabbing'; return; }
+  const p = screenToCanvas(e.clientX, e.clientY);
+  beginStroke(p.x, p.y, {pointerId: e.pointerId});
+}
+function onPointerMove(e){
+  if(isPanning){ const dx = e.clientX - lastPan.x, dy = e.clientY - lastPan.y; lastPan = {x: e.clientX, y: e.clientY}; translate.x += dx; translate.y += dy; setViewportTransform(); return; }
+  if(!drawing) return;
+  const p = screenToCanvas(e.clientX, e.clientY); addPoint(p.x, p.y);
+}
+function onPointerUp(e){ if(isPanning){ isPanning = false; viewportWrap.style.cursor = 'default'; return; } if(drawing) endStroke(); }
+
+function onWheel(e){
+  e.preventDefault();
+  const rect = viewportWrap.getBoundingClientRect();
+  const mouseX = e.clientX - rect.left, mouseY = e.clientY - rect.top;
+  const delta = -e.deltaY * 0.0015;
+  const newScale = clamp(scale * (1 + delta), 0.2, 4);
+  translate.x = mouseX - (mouseX - translate.x) * (newScale/scale);
+  translate.y = mouseY - (mouseY - translate.y) * (newScale/scale);
+  scale = newScale; setViewportTransform();
+}
+
+let lastTouchDist = null;
+viewportWrap.addEventListener('touchstart', (e)=>{
+  if(e.touches.length === 2){ lastTouchDist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY); }
+  else if(e.touches.length === 1){ const t = e.touches[0]; const p = screenToCanvas(t.clientX, t.clientY); beginStroke(p.x,p.y,{pointerId: t.identifier}); e.preventDefault(); }
+});
+viewportWrap.addEventListener('touchmove', (e)=>{
+  if(e.touches.length ===2 && lastTouchDist){ const dist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY); const delta = (dist - lastTouchDist)*0.002; const newScale = clamp(scale * (1 + delta), 0.2, 4); scale = newScale; setViewportTransform(); lastTouchDist = dist; e.preventDefault(); }
+  else if(e.touches.length === 1){ const t = e.touches[0]; const p = screenToCanvas(t.clientX, t.clientY); addPoint(p.x,p.y); e.preventDefault(); }
+});
+viewportWrap.addEventListener('touchend', (e)=>{ lastTouchDist = null; endStroke(); });
+viewportWrap.addEventListener('pointerdown', onPointerDown);
+window.addEventListener('pointermove', onPointerMove);
+window.addEventListener('pointerup', onPointerUp);
+viewportWrap.addEventListener('wheel', onWheel, {passive:false});
+window.addEventListener('keydown', (e)=>{ if(e.code === 'Space'){ spaceDown = true; viewportWrap.style.cursor = 'grab'; e.preventDefault(); }});
+window.addEventListener('keyup', (e)=>{ if(e.code === 'Space'){ spaceDown = false; viewportWrap.style.cursor = 'default'; }});
+
+document.getElementById('tool').onchange = e=> { tool = e.target.value; updateBrushPreview(); };
+document.getElementById('color').oninput = e=> { color = e.target.value; updateBrushPreview(); };
+document.getElementById('size').oninput = e=>{ baseSize = parseInt(e.target.value); updateBrushPreview(); };
+document.getElementById('smooth').oninput = e=>{ smoothFactor = parseFloat(e.target.value); };
+document.getElementById('pressureSim').onchange = e=> pressureSim = e.target.checked;
+
+document.getElementById('addLayer').onclick = ()=> createLayer('Layer '+(layers.length+1));
+document.getElementById('duplicateLayer').onclick = ()=> duplicateLayer(currentLayerIndex);
+document.getElementById('mergeDown').onclick = ()=> mergeDown(currentLayerIndex);
+document.getElementById('deleteLayer').onclick = ()=> {
+  if(currentLayerIndex<0) return alert('Pilih layer yang ingin dihapus');
+  if(!confirm('Hapus layer terpilih?')) return;
+  removeLayer(currentLayerIndex);
+};
+document.getElementById('deleteLastStroke').onclick = ()=> deleteLastStroke();
+document.getElementById('deleteAllSketches').onclick = ()=> deleteAllSketches();
+
+document.getElementById('clear').onclick = ()=> {
+  if(currentLayerIndex<0) return;
+  const l = layers[currentLayerIndex];
+  if(!confirm('Kosongkan layer ini?')) return;
+  l.ctx.clearRect(0,0,l.canvas.width,l.canvas.height);
+  l.strokes = []; l.redo = [];
+};
+document.getElementById('undo').onclick = ()=> { if(currentLayerIndex<0) return; const l = layers[currentLayerIndex]; if(l.strokes.length){ const s = l.strokes.pop(); l.redo.push(s); redrawLayer(l); } };
+document.getElementById('redo').onclick = ()=> { if(currentLayerIndex<0) return; const l = layers[currentLayerIndex]; if(l.redo.length){ const s = l.redo.pop(); l.strokes.push(s); for(let i=1;i<s.points.length;i++) drawStrokeSegment(l.ctx, s, i-1, i); } };
+
+document.getElementById('moveUp').onclick = ()=> moveLayer(currentLayerIndex,-1);
+document.getElementById('moveDown').onclick = ()=> moveLayer(currentLayerIndex,1);
+document.getElementById('renameLayer').onclick = ()=> {
+  const name = prompt('Nama layer baru:', layers[currentLayerIndex] ? layers[currentLayerIndex].name : '');
+  if(name && layers[currentLayerIndex]){ layers[currentLayerIndex].name = name; renderLayerList(); }
+};
+
+document.getElementById('darkToggle').onclick = ()=> document.body.classList.toggle('dark');
+
+document.getElementById('paper').onchange = (e)=>{
+  const v = e.target.value;
+  if(v === 'white'){ viewport.style.background = '#fff'; }
+  else if(v === 'lined'){ viewport.style.background = `repeating-linear-gradient(#f7f7f7, #f7f7f7 29px, #e6eef8 30px)`; }
+  else if(v === 'dot'){ viewport.style.background = `radial-gradient(#dcdcdc 1px, transparent 1px)`; viewport.style.backgroundSize = '20px 20px'; }
+  else if(v === 'kraft'){ viewport.style.background = '#f1e0c6'; }
+  updateBrushPreview();
+};
+
+function applyPaperBackground(ctx, w, h, paperType){
+  if(!paperType || paperType === 'white'){ ctx.fillStyle = '#ffffff'; ctx.fillRect(0,0,w,h); return; }
+  if(paperType === 'kraft'){ ctx.fillStyle = '#f1e0c6'; ctx.fillRect(0,0,w,h); return; }
+  if(paperType === 'lined'){ ctx.fillStyle = '#ffffff'; ctx.fillRect(0,0,w,h); ctx.strokeStyle = '#e6eef8'; ctx.lineWidth = Math.max(1, Math.floor(h/500)); const gap = Math.round(h/20); for(let y = gap; y < h; y += gap){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(w,y); ctx.stroke(); } return; }
+  if(paperType === 'dot'){ ctx.fillStyle = '#ffffff'; ctx.fillRect(0,0,w,h); ctx.fillStyle = '#dcdcdc'; const step = 20; for(let y=10;y<h;y+=step){ for(let x=10;x<w;x+=step){ ctx.beginPath(); ctx.arc(x,y,1.2,0,Math.PI*2); ctx.fill(); }} return; }
+  ctx.fillStyle = '#ffffff'; ctx.fillRect(0,0,w,h);
+}
+
+function compositeToDataURL(quality=0.92, format='image/png'){
+  const tmp = document.createElement('canvas'); tmp.width = CANVAS_W; tmp.height = CANVAS_H;
+  const ctx = tmp.getContext('2d');
+  const paper = document.getElementById('paper').value || 'white';
+  applyPaperBackground(ctx, tmp.width, tmp.height, paper);
+  for(const l of layers){
+    if(!l.visible) continue;
+    ctx.globalAlpha = l.opacity;
+    ctx.globalCompositeOperation = l.blend || 'source-over';
+    ctx.drawImage(l.canvas,0,0, tmp.width, tmp.height);
+  }
+  return tmp.toDataURL(format, quality);
+}
+
+function saveToGallery(title='Untitled'){
+  if(layers.length === 0) return alert('Tambah layer dulu');
+  const data = compositeToDataURL(0.92,'image/png');
+  const item = {id: uid('g'), title, date: new Date().toISOString(), preview: data};
+  gallery.unshift(item);
+  localStorage.setItem(GALLERY_KEY, JSON.stringify(gallery));
+  renderGallery();
+  alert('Tersimpan di Gallery (PNG).');
+}
+
+document.getElementById('save').onclick = ()=> {
+  const t = prompt('Judul gambar:', 'Sketsa '+(new Date()).toLocaleString());
+  saveToGallery(t || 'Sketsa');
+};
+
+function renderGallery(){
+  const el = document.getElementById('galleryList'); el.innerHTML = '';
+  if(gallery.length === 0) { el.innerHTML = '<div class="note">Gallery kosong</div>'; return; }
+  gallery.forEach((g,i)=>{
+    const box = document.createElement('div'); box.className='thumb';
+    box.innerHTML = `<img src="${g.preview}" width="80" style="border-radius:6px;border:1px solid #ccc"><div style="flex:1"><b>${g.title}</b><div class="note">${new Date(g.date).toLocaleString()}</div></div>
+      <div style="display:flex;flex-direction:column;gap:6px;">
+        <button class="open small" data-idx="${i}">Open</button>
+        <button class="dl small alt" data-idx="${i}">Delete</button>
+      </div>`;
+    el.appendChild(box);
+  });
+  el.querySelectorAll('.open').forEach(btn=> btn.onclick = e=> openFromGallery(parseInt(e.target.dataset.idx)));
+  el.querySelectorAll('.dl').forEach(btn=> btn.onclick = e=>{ if(!confirm('Hapus gambar dari gallery?')) return; const idx = parseInt(e.target.dataset.idx); gallery.splice(idx,1); localStorage.setItem(GALLERY_KEY, JSON.stringify(gallery)); renderGallery(); });
+}
+
+function openFromGallery(index){
+  const item = gallery[index]; if(!item) return;
+  const img = new Image();
+  img.onload = ()=>{ const l = createLayer(item.title); l.ctx.clearRect(0,0,l.canvas.width,l.canvas.height); l.ctx.drawImage(img,0,0, l.canvas.width, l.canvas.height); renderLayerList(); };
+  img.src = item.preview;
+}
+
+document.getElementById('clearGallery').onclick = ()=>{ if(confirm('Kosongkan gallery?')){ gallery = []; localStorage.setItem(GALLERY_KEY, JSON.stringify(gallery)); renderGallery(); } };
+document.getElementById('exportSelected').onclick = ()=>{ if(gallery.length===0) return alert('Gallery kosong'); const a = document.createElement('a'); a.href = gallery[0].preview; a.download = (gallery[0].title || 'image') + '.png'; a.click(); };
+
+document.getElementById('btnExportAll').onclick = ()=>{ const data = compositeToDataURL(0.95,'image/png'); const a = document.createElement('a'); a.href = data; a.download = 'composite_'+(new Date()).toISOString()+'.png'; a.click(); };
+
+function autosave(){
+  try{
+    const data = compositeToDataURL(0.9,'image/png');
+    localStorage.setItem(AUTOSAVE_KEY, JSON.stringify({date:new Date().toISOString(), data}));
+  }catch(err){}
+}
+function startAutosave(){
+  if(autosaveTimer) clearInterval(autosaveTimer);
+  autosaveSec = parseInt(document.getElementById('autosave').value) || 15;
+  if(autosaveSec > 0) autosaveTimer = setInterval(autosave, autosaveSec*1000);
+}
+document.getElementById('autosave').onchange = startAutosave;
+
+document.getElementById('importImageBtn').onclick = ()=> document.getElementById('importImage').click();
+document.getElementById('importImage').onchange = (e)=>{
+  const f = e.target.files && e.target.files[0];
+  if(!f) return;
+  const url = URL.createObjectURL(f);
+  const img = new Image();
+  img.onload = ()=>{ const l = createLayer(f.name || 'Imported'); l.ctx.clearRect(0,0,l.canvas.width,l.canvas.height); // scale to fit
+    const ratio = Math.min(l.canvas.width / img.width, l.canvas.height / img.height);
+    const w = img.width * ratio, h = img.height * ratio;
+    l.ctx.drawImage(img, 0, 0, img.width, img.height, (l.canvas.width-w)/2, (l.canvas.height-h)/2, w, h);
+    renderLayerList();
+    URL.revokeObjectURL(url);
+  };
+  img.src = url;
+  e.target.value = '';
+};
+
+function updateBrushPreview(){
+  bpCtx.clearRect(0,0,brushPreview.width,brushPreview.height);
+  const size = parseInt(document.getElementById('size').value) || 6;
+  bpCtx.fillStyle = '#fff'; bpCtx.fillRect(0,0,brushPreview.width,brushPreview.height);
+  bpCtx.strokeStyle = document.getElementById('color').value;
+  bpCtx.lineWidth = size;
+  bpCtx.lineCap = 'round';
+  bpCtx.beginPath(); bpCtx.moveTo(8,brushPreview.height/2); bpCtx.lineTo(brushPreview.width-8,brushPreview.height/2); bpCtx.stroke();
+}
+brushPreview.width = 56; brushPreview.height = 40;
+updateBrushPreview();
+
+function hexToRgba(hex){
+  const c = hex.replace('#','');
+  const bigint = parseInt(c,16);
+  const r = (bigint >> 16) & 255, g = (bigint >> 8) & 255, b = bigint & 255;
+  return {r,g,b,a:255};
+}
+function colorsMatch(data, idx, target){
+  return data[idx] === target.r && data[idx+1] === target.g && data[idx+2] === target.b && data[idx+3] === target.a;
+}
+function floodFillLayer(layer, x, y, fillColor){
+  const ctx = layer.ctx;
+  const w = layer.canvas.width, h = layer.canvas.height;
+  try{
+    const img = ctx.getImageData(0,0,w,h);
+    const data = img.data;
+    const stack = [];
+    const startIdx = (Math.floor(y)*w + Math.floor(x)) * 4;
+    const target = {r:data[startIdx], g:data[startIdx+1], b:data[startIdx+2], a:data[startIdx+3]};
+    if(target.r === fillColor.r && target.g === fillColor.g && target.b === fillColor.b && target.a === fillColor.a) return;
+    stack.push({x:Math.floor(x), y:Math.floor(y)});
+    while(stack.length){
+      const p = stack.pop();
+      let px = p.x, py = p.y;
+      if(px < 0 || px >= w || py < 0 || py >= h) continue;
+      let idx = (py*w + px) * 4;
+      if(!colorsMatch(data, idx, target)) continue;
+      let left = px;
+      while(left >=0 && colorsMatch(data, (py*w + left)*4, target)) left--;
+      left++;
+      let right = px;
+      while(right < w && colorsMatch(data, (py*w + right)*4, target)) right++;
+      right--;
+      for(let sx = left; sx <= right; sx++){
+        const id = (py*w + sx)*4;
+        data[id] = fillColor.r; data[id+1] = fillColor.g; data[id+2] = fillColor.b; data[id+3] = fillColor.a;
+        if(py-1 >=0 && colorsMatch(data, ((py-1)*w + sx)*4, target)) stack.push({x:sx, y:py-1});
+        if(py+1 < h && colorsMatch(data, ((py+1)*w + sx)*4, target)) stack.push({x:sx, y:py+1});
+      }
+    }
+    ctx.putImageData(img,0,0);
+  }catch(err){
+    ctx.save();
+    ctx.fillStyle = `rgba(${fillColor.r},${fillColor.g},${fillColor.b},${fillColor.a/255})`;
+    ctx.fillRect(0,0,layer.canvas.width, layer.canvas.height);
+    ctx.restore();
+  }
+}
+
+function init(){
+  viewport.style.width = CANVAS_W+'px';
+  viewport.style.height = CANVAS_H+'px';
+  viewport.style.background = '#fff';
+  createLayer('Background');
+  layers[0].locked = true; layers[0].visible = true; layers[0].name = 'Background (Locked)';
+  createLayer('Sketch 1');
+  setViewportTransform();
+  renderLayerList();
+  renderGallery();
+  startAutosave();
+}
+init();
+
+(function tryLoadAutosave(){
+  const raw = localStorage.getItem(AUTOSAVE_KEY);
+  if(raw){
+    try{
+      const obj = JSON.parse(raw);
+      if(obj && obj.data && confirm('Pulihkan autosaved canvas terakhir ('+new Date(obj.date).toLocaleString()+')?')){
+        const img = new Image();
+        img.onload = ()=> { const l = createLayer('Recovered'); l.ctx.clearRect(0,0,l.canvas.width,l.canvas.height); l.ctx.drawImage(img,0,0,l.canvas.width,l.canvas.height); renderLayerList(); };
+        img.src = obj.data;
+      }
+    }catch(e){}
+  }
+})();
+</script>
+</body>
+</html>

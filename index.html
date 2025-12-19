@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>GlowZ</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Zen+Serif:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div class="bg-flow"></div>
+<div class="bg-blobs"></div>
+<div class="bg-particles"></div>
+
+<main class="app">
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">
+        <img src="img/gg.png" alt="My Planner">
+      </div>
+      <div class="title-wrap">
+        <h1>GlowZ</h1>
+      </div>
+    </div>
+
+    <div class="controls">
+      <div class="search">
+        <input id="search" type="search" placeholder="Cari template">
+      </div>
+    </div>
+  </header>
+
+  <section class="menu-section">
+    <div class="section-title">Planner</div>
+    <div id="menuGrid" class="menu big"></div>
+  </section>
+
+
+  <section class="menu-section">
+    <div class="section-title">Trackers & Tools </div>
+    <div id="menuGrid2" class="menu"></div>
+  </section>
+</main>
+
+<nav class="footer">
+  <a class="tab active" href="index.html">Home</a>
+  <a class="tab" href="calendar.html">Calendar</a>
+  <a class="tab" href="profile.html">Profile</a>
+  <a class="tab" href="About.html">About us</a>
+</nav>
+
+<div class="toast-wrap" id="toasts"></div>
+
+
+<div id="quickPanel" class="quick-panel" style="display:none">
+  <div class="quick-h">
+    <strong>Quick Panel</strong>
+    <button id="closeQuick" class="ctrl-btn">✕</button>
+  </div>
+  <textarea id="quickNote" placeholder="Catatan singkat..."></textarea>
+  <button id="saveNote" class="ctrl-btn">Save</button>
+</div>
+
+<script src="script.js"></script>
+
+</body>
+</html>

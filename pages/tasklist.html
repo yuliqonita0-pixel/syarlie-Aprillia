@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tasklist Glass Edition</title>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Serif:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{
+  font-family:"Zen Serif", serif;
+  background:linear-gradient(135deg,#f7d9f5,#e8c9ff,#ffd6e8);
+  padding:40px 20px;
+  min-height:100vh;
+}
+.wrap{max-width:1000px;margin:auto;}
+h1{
+  text-align:center;
+  background:hsl(202, 85%, 71%);
+  color:#fff;
+  padding:14px 26px;
+  border-radius:16px;
+  margin-bottom:26px;
+}
+.glass{
+  background:rgba(255,255,255,0.45);
+  backdrop-filter:blur(18px);
+  padding:22px;
+  border-radius:26px;
+  margin-bottom:28px;
+}
+input, select{
+  width:100%;padding:14px;border-radius:14px;border:none;margin-bottom:12px;
+}
+.btn{padding:10px 18px;border:none;border-radius:14px;font-weight:600;cursor:pointer;}
+.add{background:#ffd86b;}
+.save{background:#7ddef1;color:#fff;}
+.del{background:#ff6b6b;color:#fff;}
+.fav{background:#ffb300;color:#fff;}
+.task{
+  background:#fff;border-radius:22px;padding:18px;margin-bottom:14px;
+  display:flex;flex-wrap:wrap;gap:12px;align-items:center;
+}
+.text{flex:1;padding:10px;background:#f2f2f2;border-radius:12px;}
+.emoji{font-size:22px;cursor:pointer;}
+.deadline{font-size:11px;opacity:.7;min-width:100px;}
+.kanban{display:flex;gap:20px;flex-wrap:wrap;margin-top:20px;}
+.col{
+  flex:1;min-width:220px;background:rgba(255,255,255,0.45);
+  border-radius:22px;padding:16px;
+}
+.col h3{text-align:center;margin-bottom:10px;}
+.progress-wrap{height:12px;background:#eee;border-radius:999px;overflow:hidden;margin-top:12px;}
+#progress{height:100%;background:linear-gradient(90deg,#4caf50,#ffd86b);width:0;}
+</style>
+</head>
+
+<body>
+<div class="wrap">
+<h1>Tasklist</h1>
+
+<div class="glass">
+  <input type="text" placeholder="Cari task..." oninput="searchTask(this.value)">
+  <select id="filterCategory" onchange="filterCategory()">
+    <option value="all">Semua</option>
+    <option value="Kerja">Kerja</option>
+    <option value="kuliah">kuliah</option>
+    <option value="Ide">Ide</option>
+  </select>
+  <button class="btn add" onclick="addTask()">＋ Tambah Task</button>
+</div>
+
+<div class="glass">
+  <h2>Tasks</h2>
+  <div id="tasks"></div>
+  <div class="progress-wrap"><div id="progress"></div></div>
+</div>
+
+<h2>Kanban Board</h2>
+<div class="kanban">
+  <div class="col" id="colKerja"><h3>Kerja</h3></div>
+  <div class="col" id="colkuliah"><h3>kuliah</h3></div>
+  <div class="col" id="colIde"><h3>Ide</h3></div>
+</div>
+</div>
+
+<script>
+let draggedTask=null;
+
+function addTask(){
+  const t=document.createElement('div');
+  t.className='task';
+  t.draggable=true;
+  t.innerHTML=`
+    <span class="emoji" onclick="pickEmoji(this)">🔥</span>
+    <button class="btn fav" onclick="favorite(this)">★</button>
+
+    <select class="category">
+      <option>Kerja</option>
+      <option>kuliah</option>
+      <option>Ide</option>
+    </select>
+
+    <input type="datetime-local" onchange="updateDeadline(this)">
+    <div class="deadline"></div>
+
+    <div class="text" contenteditable="true">Tugas baru...</div>
+
+    <button class="btn save" onclick="saveTask(this)">Save</button>
+    <button class="btn del" onclick="removeTask(this)">Hapus</button>
+  `;
+  document.getElementById('tasks').appendChild(t);
+  enableDrag(t);
+  save();
+}
+
+function saveTask(btn){
+  const task=btn.parentElement;
+  const cat=task.querySelector('.category').value;
+  document.getElementById('col'+cat).appendChild(task);
+  save();
+}
+
+function removeTask(btn){btn.parentElement.remove();save();}
+function pickEmoji(e){let x=prompt('Emoji?');if(x)e.innerText=x;save();}
+function favorite(btn){document.getElementById('tasks').prepend(btn.parentElement);save();}
+
+function updateDeadline(i){
+  const d=i.parentElement.querySelector('.deadline');
+  if(!i.value){d.innerText='';return;}
+  const diff=new Date(i.value)-new Date();
+  d.innerText=diff<=0?'Sudah lewat':Math.floor(diff/36e5)+' jam lagi';
+  save();
+}
+
+function searchTask(k){
+  k=k.toLowerCase();
+  document.querySelectorAll('.task').forEach(t=>{
+    t.style.display=t.querySelector('.text').innerText.toLowerCase().includes(k)?'flex':'none';
+  });
+}
+
+function filterCategory(){
+  const c=document.getElementById('filterCategory').value;
+  document.querySelectorAll('.task').forEach(t=>{
+    const v=t.querySelector('.category').value;
+    t.style.display=(c==='all'||c===v)?'flex':'none';
+  });
+}
+
+function enableDrag(t){
+  t.addEventListener('dragstart',()=>{draggedTask=t;t.style.opacity=.4});
+  t.addEventListener('dragend',()=>{draggedTask=null;t.style.opacity=1;save();});
+}
+
+document.querySelectorAll('.col').forEach(c=>{
+  c.addEventListener('dragover',e=>e.preventDefault());
+  c.addEventListener('drop',()=>{
+    if(draggedTask){
+      c.appendChild(draggedTask);
+      draggedTask.querySelector('.category').value=c.id.replace('col','');
+      save();
+    }
+  });
+});
+
+function save(){
+  const data={
+    tasks:document.getElementById('tasks').innerHTML,
+    kerja:document.getElementById('colKerja').innerHTML,
+    kuliah:document.getElementById('colkuliah').innerHTML,
+    ide:document.getElementById('colIde').innerHTML
+  };
+  localStorage.setItem('tasksGlass',JSON.stringify(data));
+  updateProgress();
+}
+
+function load(){
+  const s=localStorage.getItem('tasksGlass');
+  if(!s)return;
+  const d=JSON.parse(s);
+  document.getElementById('tasks').innerHTML=d.tasks||'';
+  document.getElementById('colKerja').innerHTML=d.kerja||'<h3>Kerja</h3>';
+  document.getElementById('colkuliah').innerHTML=d.kuliah||'<h3>kuliah</h3>';
+  document.getElementById('colIde').innerHTML=d.ide||'<h3>Ide</h3>';
+  document.querySelectorAll('.task').forEach(enableDrag);
+  updateProgress();
+}
+
+function updateProgress(){
+  const all=document.querySelectorAll('.task').length;
+  document.getElementById('progress').style.width=all? '100%' : '0%';
+}
+
+load();
+</script>
+</body>
+</html>

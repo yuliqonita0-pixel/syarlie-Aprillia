@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Goal Tracker 🌱</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Zen+Serif:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+@keyframes bgMove {
+  0%{background-position:0% 50%}
+  50%{background-position:100% 50%}
+  100%{background-position:0% 50%}
+}
+
+:root{
+  --bg1:#f3e8ff;
+  --bg2:#fde2e4;
+  --bg3:#e0f2fe;
+  --primary:#a78bfa;
+  --accent:#f9a8d4;
+  --soft:#bae6fd;
+}
+
+body{
+  font-family:"Zen Serif", serif;
+  margin:0;
+  padding:30px;
+  min-height:100vh;
+  background:linear-gradient(270deg,var(--bg1),var(--bg2),var(--bg3));
+  background-size:400% 400%;
+  animation:bgMove 20s ease infinite;
+}
+
+.wrap{
+  max-width:880px;
+  margin:auto;
+  color:#4b5563;
+}
+
+h1{
+  font-size:40px;
+  letter-spacing:-1px;
+  margin-bottom:20px;
+  color:#6d28d9;
+}
+
+.glass{
+  background:rgba(255,255,255,.65);
+  backdrop-filter:blur(18px);
+  border-radius:28px;
+  padding:26px;
+  box-shadow:0 20px 60px rgba(0,0,0,.08);
+}
+
+.progress-wrap{
+  height:20px;
+  background:#f1f5f9;
+  border-radius:20px;
+  overflow:hidden;
+  margin-bottom:10px;
+}
+
+.progress{
+  height:100%;
+  width:0%;
+  background:linear-gradient(90deg,var(--primary),var(--accent));
+  transition:.4s;
+}
+
+#progressText{
+  font-size:14px;
+  margin-bottom:14px;
+}
+
+.goal{
+  background:#ffffff;
+  padding:16px 18px;
+  border-radius:18px;
+  margin-bottom:12px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  transition:.25s;
+}
+
+.goal:hover{
+  transform:translateY(-3px);
+  box-shadow:0 10px 24px rgba(0,0,0,.06);
+}
+
+.goal input{
+  transform:scale(1.2);
+  accent-color:var(--primary);
+}
+
+.cat{
+  font-size:12px;
+  padding:6px 12px;
+  border-radius:20px;
+  background:#f1f5f9;
+  color:#475569;
+}
+
+.add{
+  display:flex;
+  gap:10px;
+  margin-top:20px;
+}
+
+.add input,select{
+  flex:1;
+  padding:14px;
+  border-radius:16px;
+  border:1px solid #e5e7eb;
+  outline:none;
+  background:#fff;
+}
+
+button{
+  background:linear-gradient(135deg,var(--primary),var(--accent));
+  border:none;
+  color:#fff;
+  padding:14px 22px;
+  border-radius:18px;
+  font-weight:600;
+  cursor:pointer;
+}
+
+button:hover{
+  opacity:.9;
+}
+
+.badge{
+  margin:10px 0;
+  font-size:16px;
+  color:#7c3aed;
+}
+</style>
+</head>
+
+<body>
+<div class="wrap">
+<h1>Goal Tracker</h1>
+
+<div class="glass">
+
+<div class="progress-wrap">
+  <div class="progress" id="progress"></div>
+</div>
+<div id="progressText">0% complete</div>
+<div class="badge" id="badge"></div>
+
+<div id="goals"></div>
+
+<div class="add">
+  <input id="goalInput" placeholder="✨ Tulis goal kamu hari ini">
+  <select id="cat">
+    <option>belajar</option>
+    <option>kerja</option>
+    <option>kesehatan</option>
+    <option>pribadi</option>
+  </select>
+  <button onclick="addGoal()">Tambah</button>
+</div>
+
+</div>
+</div>
+
+<script>
+const goalsEl=document.getElementById('goals');
+let goals=JSON.parse(localStorage.getItem('goals')||'[]');
+
+const emoji=c=>({belajar:'📘',kerja:'💼',kesehatan:'💪',pribadi:'🌿'}[c]||'🎯');
+const save=()=>localStorage.setItem('goals',JSON.stringify(goals));
+
+function render(){
+  goalsEl.innerHTML='';
+  goals.forEach(g=>{
+    const d=document.createElement('div');
+    d.className='goal';
+    d.innerHTML=`
+      <label style="display:flex;gap:10px;align-items:center">
+        <input type="checkbox" ${g.done?'checked':''}>
+        <span contenteditable>${g.text}</span>
+      </label>
+      <span class="cat">${emoji(g.cat)} ${g.cat}</span>
+    `;
+    d.querySelector('input').onchange=e=>{
+      g.done=e.target.checked;update();save();
+    };
+    d.querySelector('[contenteditable]').oninput=e=>{
+      g.text=e.target.innerText;save();
+    };
+    goalsEl.appendChild(d);
+  });
+  update();
+}
+
+function addGoal(){
+  if(!goalInput.value.trim()) return;
+  goals.push({
+    id:Date.now(),
+    text:goalInput.value,
+    done:false,
+    cat:cat.value
+  });
+  goalInput.value='';
+  save();render();
+}
+
+function update(){
+  const t=goals.length;
+  const d=goals.filter(g=>g.done).length;
+  const p=t?Math.round(d/t*100):0;
+  progress.style.width=p+'%';
+  progressText.innerText=`${p}% complete`;
+
+  badge.innerText=
+    p===100?'🏆 Semua goal tercapai!':
+    p>=50?'✨ Tinggal sedikit lagi':
+    p>=25?'🌱 Awal yang bagus':
+    '';
+}
+
+render();
+</script>
+</body>
+</html>
